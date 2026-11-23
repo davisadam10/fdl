@@ -974,3 +974,29 @@ TEST_CASE("as_json after mutation", "[raii][facade][serialization]") {
     auto json2 = doc2.as_json(2);
     REQUIRE(json == json2);
 }
+
+TEST_CASE("RAII set_custom_attr overload resolution", "[raii][facade][custom_attr]") {
+    auto doc = fdl::FDL::create("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", 2, 0, "test");
+    auto ctx = doc.add_context("Source", "test");
+
+    // String literal must resolve to string overload, NOT bool
+    REQUIRE(doc.set_custom_attr("note", "hello") == 0);
+    REQUIRE(doc.get_custom_attr_string("note") == std::optional<std::string>("hello"));
+    REQUIRE_FALSE(doc.get_custom_attr_bool("note").has_value());
+
+    // Plain int literal must compile unambiguously and store int64
+    REQUIRE(doc.set_custom_attr("count", 42) == 0);
+    REQUIRE(doc.get_custom_attr_int("count") == std::optional<int64_t>(42));
+
+    // Double and bool overloads
+    REQUIRE(doc.set_custom_attr("ratio", 1.5) == 0);
+    REQUIRE(doc.get_custom_attr_float("ratio").value() == Approx(1.5));
+    REQUIRE(doc.set_custom_attr("flag", true) == 0);
+    REQUIRE(doc.get_custom_attr_bool("flag") == std::optional<bool>(true));
+
+    // Same on *Ref handle
+    REQUIRE(ctx.set_custom_attr("tag", "cam_a") == 0);
+    REQUIRE(ctx.get_custom_attr_string("tag") == std::optional<std::string>("cam_a"));
+    REQUIRE(ctx.set_custom_attr("reel", 7) == 0);
+    REQUIRE(ctx.get_custom_attr_int("reel") == std::optional<int64_t>(7));
+}

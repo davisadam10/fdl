@@ -433,9 +433,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_doc_set_custom_attr_string(doc_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_doc_set_custom_attr_string(doc_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_doc_set_custom_attr_int(doc_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_doc_set_custom_attr_int(doc_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -625,9 +633,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_context_set_custom_attr_string(ctx_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_context_set_custom_attr_string(ctx_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_context_set_custom_attr_int(ctx_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_context_set_custom_attr_int(ctx_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -837,9 +853,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_canvas_set_custom_attr_string(canvas_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_canvas_set_custom_attr_string(canvas_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_canvas_set_custom_attr_int(canvas_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_canvas_set_custom_attr_int(canvas_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1044,9 +1068,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_framing_decision_set_custom_attr_string(fd_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_framing_decision_set_custom_attr_string(fd_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_framing_decision_set_custom_attr_int(fd_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_framing_decision_set_custom_attr_int(fd_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1195,9 +1227,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_framing_intent_set_custom_attr_string(fi_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_framing_intent_set_custom_attr_string(fi_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_framing_intent_set_custom_attr_int(fi_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_framing_intent_set_custom_attr_int(fi_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1391,9 +1431,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_canvas_template_set_custom_attr_string(ct_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_canvas_template_set_custom_attr_string(ct_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_canvas_template_set_custom_attr_int(ct_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_canvas_template_set_custom_attr_int(ct_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1555,9 +1603,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_clip_id_set_custom_attr_string(cid_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_clip_id_set_custom_attr_string(cid_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_clip_id_set_custom_attr_int(cid_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_clip_id_set_custom_attr_int(cid_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1689,9 +1745,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return fdl_file_sequence_set_custom_attr_string(seq_, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return fdl_file_sequence_set_custom_attr_string(seq_, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return fdl_file_sequence_set_custom_attr_int(seq_, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return fdl_file_sequence_set_custom_attr_int(seq_, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -2217,6 +2281,10 @@ inline void write_to_file(const FDL& doc, const std::string& path, bool validate
         throw std::runtime_error("Cannot open file for writing: " + path);
     }
     ofs.write(json.data(), static_cast<std::streamsize>(json.size()));
+    ofs.flush();
+    if (!ofs) {
+        throw std::runtime_error("Failed to write file: " + path);
+    }
 }
 
 } // namespace fdl
