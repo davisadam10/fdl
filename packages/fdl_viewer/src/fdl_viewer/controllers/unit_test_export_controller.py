@@ -96,7 +96,7 @@ class UnitTestExportController(QObject):
     def export_unit_test(
         self,
         source_fdl: FDL,
-        _source_fdl_path: str,
+        source_fdl_path: str,
         template: CanvasTemplate,
         template_fdl: FDL,
         output_fdl: FDL,
@@ -293,9 +293,9 @@ class UnitTestExportController(QObject):
 
         content = exported_scenarios_path.read_text(encoding="utf-8")
 
-        # Find the EXPORTED_SCENARIO_CONFIGS dict and insert before the closing brace
-        # Pattern: find "EXPORTED_SCENARIO_CONFIGS = {" followed by content and "}"
-        pattern = r"(EXPORTED_SCENARIO_CONFIGS\s*=\s*\{)(.*?)(\})"
+        # Find the EXPORTED_SCENARIO_CONFIGS dict and insert before its top-level closing brace
+        # (non-greedy .*?\} would wrongly match "{variant}" inside format strings).
+        pattern = r"(EXPORTED_SCENARIO_CONFIGS\s*=\s*\{)(.*?)(\n\})"
         match = re.search(pattern, content, re.DOTALL)
 
         if match:

@@ -181,7 +181,7 @@ def reset_app_state(app_state, main_window):
     app_state._output_fdl = None
 
     # Clear selection state
-    app_state._selected_context = ""
+    app_state._selected_context = -1
     app_state._selected_canvas = ""
     app_state._selected_framing = ""
 

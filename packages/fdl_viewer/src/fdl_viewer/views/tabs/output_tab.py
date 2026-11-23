@@ -181,3 +181,9 @@ class OutputTab(QWidget):
             The scale factor applied during transformation.
         """
         self._canvas.set_hud_data(source_model, template, output_model, content_translation, scale_factor)
+
+    @property
+    def canvas(self) -> CanvasWidget:
+        """Return the output canvas widget."""
+        return self._canvas
+
