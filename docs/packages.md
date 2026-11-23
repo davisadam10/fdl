@@ -47,7 +47,7 @@ The core `asc-fdl` package also provides a command-line validation tool:
 
 ```shell
 fdl-validate scene.fdl              # validate a single file
-fdl-validate *.fdl --strict         # validate multiple files
+fdl-validate *.fdl                  # validate multiple files
 ```
 
 **Source:** `native/bindings/python/fdl/cli.py`

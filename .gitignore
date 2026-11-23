@@ -13,13 +13,18 @@ native/build/
 
 # Doxygen generated docs
 native/core/docs/api/
+docs/api/
+_site/
 
 # TypeDoc generated docs
 docs/node-api/
 
-# Python build artifacts
+# Python build & cache artifacts
 native/bindings/python/build/**
-native/bindings/python/fdl.egg-info/**
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
 
 # Viewer build artifacts
 packages/fdl_viewer/.build_venv/**

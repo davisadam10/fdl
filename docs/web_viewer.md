@@ -50,7 +50,7 @@ If you have already run setup, you can start the servers directly:
 
 ```shell
 cd examples/web_viewer
-PYTHON_PATH=.venv/bin/python npm run dev
+PYTHON_PATH=../../.venv/bin/python npm run dev
 ```
 
 ## Stack
