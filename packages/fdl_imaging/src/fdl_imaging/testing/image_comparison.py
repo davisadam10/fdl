@@ -314,8 +314,7 @@ class ImageComparison:
 
         # Set bits per sample if specified
         if bits_per_sample > 0:
-            spec = image_buf.spec()
-            spec.attribute(OIIO_BITS_PER_SAMPLE, bits_per_sample)
+            image_buf.specmod().attribute(OIIO_BITS_PER_SAMPLE, bits_per_sample)
 
         image_buf.write(str(output_path))
         return output_path

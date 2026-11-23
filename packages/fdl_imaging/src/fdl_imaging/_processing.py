@@ -247,13 +247,16 @@ def _warp_compose(
     # region (cut resets its origin to 0,0) and paste it back onto a black
     # canvas at its output position.  Everything outside content_roi is padding.
     x0, x1, y0, y1 = content_roi
+    dst = ImageBuf(dst_spec)
+    ImageBufAlgo.zero(dst)
+    if x0 >= x1 or y0 >= y1:
+        return dst
+
     region = ImageBuf()
     ImageBufAlgo.cut(region, warped, ROI(x0, x1, y0, y1))
     if region.has_error:
         raise OSError(f"Failed to cut content region: {region.geterror()}")
 
-    dst = ImageBuf(dst_spec)
-    ImageBufAlgo.zero(dst)
     ImageBufAlgo.paste(dst, x0, y0, 0, 0, region)
     if dst.has_error:
         raise OSError(f"Failed to compose output: {dst.geterror()}")
@@ -682,7 +685,11 @@ def transform_image_with_computed_values(
     # fdl_dimensions_normalize_and_scale: the pixel width-scale carries the
     # source/output squeeze ratio (source_squeeze in the numerator), while the
     # height axis scales by scale_factor alone.
-    scale_x = scale_factor * (source_canvas.anamorphic_squeeze / new_canvas.anamorphic_squeeze)
+    src_squeeze = source_canvas.anamorphic_squeeze or 1.0
+    dst_squeeze = new_canvas.anamorphic_squeeze or 1.0
+    if src_squeeze <= 0 or dst_squeeze <= 0:
+        raise ValueError(f"anamorphic_squeeze must be > 0 (got source={src_squeeze}, target={dst_squeeze})")
+    scale_x = scale_factor * (src_squeeze / dst_squeeze)
     scale_y = scale_factor
 
     # new_canvas.dimensions is integer-typed post-round; cast defensively.
