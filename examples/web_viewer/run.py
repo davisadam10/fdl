@@ -78,14 +78,14 @@ def setup_python_venv() -> None:
         print("Python dependencies verified.")
 
 
-def build_node_addon(skip: bool) -> None:
+def build_node_addon(skip: bool, force: bool = False) -> None:
     """Build the Node.js native addon."""
     if skip:
         print("\n--- Skipping native addon build ---")
         return
 
     dist_dir = REPO_ROOT / "native" / "bindings" / "node" / "dist"
-    if dist_dir.exists() and any(dist_dir.iterdir()):
+    if not force and dist_dir.exists() and any(dist_dir.iterdir()):
         print("\n--- Native addon already built, skipping (use --force-build to rebuild) ---")
         return
 
@@ -159,7 +159,7 @@ def main() -> None:
     # Setup steps
     setup_python_venv()
     skip_build = args.skip_build and not args.force_build
-    build_node_addon(skip_build)
+    build_node_addon(skip_build, force=args.force_build)
     install_npm_deps()
 
     if args.setup_only:

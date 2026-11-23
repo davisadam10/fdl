@@ -46,8 +46,8 @@ setInterval(() => {
 // Resolve Python path: PYTHON_PATH env → workspace .venv → python3 fallback
 function resolvePythonPath(): string {
   if (process.env.PYTHON_PATH) return process.env.PYTHON_PATH;
-  // Walk up from __dirname (server/src/services/) to repo root
-  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..", "..", "..");
+  // Walk up from __dirname (examples/web_viewer/server/src/services/) to repo root (5 levels)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..", "..");
   const venvPython = path.join(repoRoot, ".venv", "bin", "python");
   if (fs.existsSync(venvPython)) return venvPython;
   return "python3";
@@ -89,21 +89,24 @@ export async function storeImage(
   filePath: string,
   originalName: string,
 ): Promise<ImageUploadResponse> {
-  const metadata = await sharp(filePath).metadata();
-  if (!metadata.width || !metadata.height) {
-    throw new Error("Could not read image dimensions");
-  }
-
-  // Convert to PNG for consistent browser serving
   const id = uuidv4();
   const pngPath = path.join(uploadDir, `${id}.png`);
-  await sharp(filePath).png().toFile(pngPath);
-
-  // Remove the original upload
+  let metadata: sharp.Metadata;
   try {
-    fs.unlinkSync(filePath);
-  } catch {
-    // ignore
+    metadata = await sharp(filePath).metadata();
+    if (!metadata.width || !metadata.height) {
+      throw new Error("Could not read image dimensions");
+    }
+
+    // Convert to PNG for consistent browser serving
+    await sharp(filePath).png().toFile(pngPath);
+  } finally {
+    // Always remove the multer temp upload even if sharp throws
+    try {
+      fs.unlinkSync(filePath);
+    } catch {
+      // ignore
+    }
   }
 
   imageStore.set(id, {
