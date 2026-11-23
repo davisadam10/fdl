@@ -93,15 +93,18 @@ fdl_custom_attr_type_t get_type(const ojson* node, const char* name) {
         return FDL_CUSTOM_ATTR_TYPE_FLOAT;
     }
     if (val.is_object()) {
-        if (val.contains("x") && val.contains("y")) {
+        if (val.contains("x") && val.contains("y") && val["x"].is_number() && val["y"].is_number()) {
             return FDL_CUSTOM_ATTR_TYPE_POINT_F64;
         }
         if (val.contains("width") && val.contains("height")) {
             const auto& w = val["width"];
-            if (w.is_double()) {
-                return FDL_CUSTOM_ATTR_TYPE_DIMS_F64;
+            const auto& h = val["height"];
+            if (w.is_number() && h.is_number()) {
+                if (w.is_double() || h.is_double()) {
+                    return FDL_CUSTOM_ATTR_TYPE_DIMS_F64;
+                }
+                return FDL_CUSTOM_ATTR_TYPE_DIMS_I64;
             }
-            return FDL_CUSTOM_ATTR_TYPE_DIMS_I64;
         }
         return FDL_CUSTOM_ATTR_TYPE_OTHER;
     }
@@ -253,11 +256,18 @@ int get_int(const ojson* node, const char* name, int64_t* out) {
         return fdl::constants::kCustomAttrError;
     }
     const auto& val = (*node)[key];
-    if (!val.is_int64() && !val.is_uint64()) {
-        return fdl::constants::kCustomAttrError;
+    if (val.is_int64()) {
+        *out = val.as<int64_t>();
+        return fdl::constants::kCustomAttrSuccess;
     }
-    *out = val.as<int64_t>();
-    return fdl::constants::kCustomAttrSuccess;
+    if (val.is_uint64()) {
+        auto u = val.as<uint64_t>();
+        if (u <= static_cast<uint64_t>(INT64_MAX)) {
+            *out = static_cast<int64_t>(u);
+            return fdl::constants::kCustomAttrSuccess;
+        }
+    }
+    return fdl::constants::kCustomAttrError;
 }
 
 int get_float(const ojson* node, const char* name, double* out) {
@@ -308,8 +318,13 @@ int get_point_f64(const ojson* node, const char* name, double* x, double* y) {
     if (!val.is_object() || !val.contains("x") || !val.contains("y")) {
         return fdl::constants::kCustomAttrError;
     }
-    *x = val["x"].as<double>();
-    *y = val["y"].as<double>();
+    const auto& vx = val["x"];
+    const auto& vy = val["y"];
+    if (!vx.is_number() || !vy.is_number()) {
+        return fdl::constants::kCustomAttrError;
+    }
+    *x = vx.as<double>();
+    *y = vy.as<double>();
     return fdl::constants::kCustomAttrSuccess;
 }
 
@@ -326,11 +341,12 @@ int get_dims_f64(const ojson* node, const char* name, double* width, double* hei
         return fdl::constants::kCustomAttrError;
     }
     const auto& w = val["width"];
-    if (!w.is_double()) {
+    const auto& h = val["height"];
+    if (!w.is_number() || !h.is_number() || (!w.is_double() && !h.is_double())) {
         return fdl::constants::kCustomAttrError;
     }
     *width = w.as<double>();
-    *height = val["height"].as<double>();
+    *height = h.as<double>();
     return fdl::constants::kCustomAttrSuccess;
 }
 
@@ -347,14 +363,31 @@ int get_dims_i64(const ojson* node, const char* name, int64_t* width, int64_t* h
         return fdl::constants::kCustomAttrError;
     }
     const auto& w = val["width"];
-    if (w.is_double()) {
+    const auto& h = val["height"];
+    if (w.is_double() || h.is_double()) {
         return fdl::constants::kCustomAttrError;
     }
-    if (!w.is_int64() && !w.is_uint64()) {
+    auto fits_i64 = [](const ojson& v, int64_t& out_v) -> bool {
+        if (v.is_int64()) {
+            out_v = v.as<int64_t>();
+            return true;
+        }
+        if (v.is_uint64()) {
+            auto u = v.as<uint64_t>();
+            if (u <= static_cast<uint64_t>(INT64_MAX)) {
+                out_v = static_cast<int64_t>(u);
+                return true;
+            }
+        }
+        return false;
+    };
+    int64_t wi = 0;
+    int64_t hi = 0;
+    if (!fits_i64(w, wi) || !fits_i64(h, hi)) {
         return fdl::constants::kCustomAttrError;
     }
-    *width = w.as<int64_t>();
-    *height = val["height"].as<int64_t>();
+    *width = wi;
+    *height = hi;
     return fdl::constants::kCustomAttrSuccess;
 }
 

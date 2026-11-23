@@ -447,6 +447,7 @@ TEST_CASE("Context clip_id accessors", "[accessors][context]") {
         auto* json = fdl_context_get_clip_id(ctx);
         REQUIRE(json != nullptr);
         std::string json_str(json);
+        fdl_free(const_cast<char*>(json));
         REQUIRE(json_str.find("A001") != std::string::npos);
     }
 
@@ -654,4 +655,97 @@ TEST_CASE("NULL handle safety", "[accessors][null]") {
     REQUIRE(fdl_doc_framing_intents_count(nullptr) == 0);
     REQUIRE(fdl_doc_contexts_count(nullptr) == 0);
     REQUIRE(fdl_doc_canvas_templates_count(nullptr) == 0);
+
+    // Null input / output pointer guards
+    auto pr = fdl_doc_parse_json(nullptr, 10);
+    REQUIRE(pr.doc == nullptr);
+    REQUIRE(pr.error != nullptr);
+    fdl_free(const_cast<char*>(pr.error));
+
+    fdl_geometry_t geo{};
+    fdl_dimensions_f64_t dims{};
+    fdl_point_f64_t pt{};
+    REQUIRE(fdl_geometry_get_dims_anchor_from_path(nullptr, FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS, &dims, &pt) < 0);
+    REQUIRE(fdl_geometry_get_dims_anchor_from_path(&geo, FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS, nullptr, &pt) < 0);
+    REQUIRE(fdl_geometry_get_dims_anchor_from_path(&geo, FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS, &dims, nullptr) < 0);
+    REQUIRE(fdl_resolve_geometry_layer(nullptr, nullptr, FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS, nullptr, &pt) < 0);
+    REQUIRE(fdl_resolve_geometry_layer(nullptr, nullptr, FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS, &dims, nullptr) < 0);
+    REQUIRE(fdl_canvas_get_effective_rect(nullptr, nullptr) == 0);
+    REQUIRE(fdl_framing_decision_get_protection_rect(nullptr, nullptr) == 0);
+}
+
+TEST_CASE("Explicit JSON null optional fields do not crash or report present", "[accessors][null_json]") {
+    const char* json = R"({
+        "uuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+        "version": {"major": 2, "minor": 0},
+        "fdl_creator": "test",
+        "contexts": [{
+            "label": "Ctx",
+            "clip_id": null,
+            "canvases": [{
+                "id": "C1",
+                "label": "Canvas",
+                "source_canvas_id": "C1",
+                "dimensions": {"width": 1920, "height": 1080},
+                "effective_dimensions": null,
+                "photosite_dimensions": null,
+                "physical_dimensions": null,
+                "anamorphic_squeeze": null,
+                "framing_decisions": [{
+                    "id": "C1-FI1",
+                    "label": "FD",
+                    "framing_intent_id": "FI1",
+                    "dimensions": {"width": 1920.0, "height": 1080.0},
+                    "anchor_point": {"x": 0.0, "y": 0.0},
+                    "protection_dimensions": null
+                }]
+            }]
+        }],
+        "canvas_templates": [{
+            "id": "T1",
+            "label": "Tmpl",
+            "target_dimensions": {"width": 1920, "height": 1080},
+            "target_anamorphic_squeeze": 1.0,
+            "fit_source": "framing_decision.dimensions",
+            "fit_method": "width",
+            "alignment_method_horizontal": "center",
+            "alignment_method_vertical": "center",
+            "preserve_from_source_canvas": null,
+            "maximum_dimensions": null,
+            "pad_to_maximum": null
+        }]
+    })";
+    auto pr = fdl_doc_parse_json(json, std::strlen(json));
+    REQUIRE(pr.doc != nullptr);
+    auto* ctx = fdl_doc_context_at(pr.doc, 0);
+    REQUIRE(fdl_context_has_clip_id(ctx) == 0);
+    REQUIRE(fdl_context_clip_id(ctx) == nullptr);
+
+    auto* cvs = fdl_context_canvas_at(ctx, 0);
+    REQUIRE(fdl_canvas_has_effective_dimensions(cvs) == 0);
+    REQUIRE(fdl_canvas_has_photosite_dimensions(cvs) == 0);
+    REQUIRE(fdl_canvas_has_physical_dimensions(cvs) == 0);
+    REQUIRE(fdl_canvas_get_anamorphic_squeeze(cvs) == 1.0);
+
+    auto* fd = fdl_canvas_framing_decision_at(cvs, 0);
+    REQUIRE(fdl_framing_decision_has_protection(fd) == 0);
+    // Calling adjust_protection_anchor when protection_dimensions is null must not throw/terminate
+    fdl_framing_decision_adjust_protection_anchor(fd, cvs, FDL_HALIGN_CENTER, FDL_VALIGN_CENTER);
+
+    auto* ct = fdl_doc_canvas_template_at(pr.doc, 0);
+    REQUIRE(fdl_canvas_template_has_preserve_from_source_canvas(ct) == 0);
+    REQUIRE(fdl_canvas_template_get_preserve_from_source_canvas(ct) == FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS);
+    REQUIRE(fdl_canvas_template_has_maximum_dimensions(ct) == 0);
+    REQUIRE(fdl_canvas_template_get_pad_to_maximum(ct) == 0);
+
+    fdl_doc_free(pr.doc);
+}
+
+TEST_CASE("Malformed non-array collection does not throw across C ABI", "[accessors][malformed]") {
+    const char* json = R"({"contexts": {"not": "an array"}})";
+    auto pr = fdl_doc_parse_json(json, std::strlen(json));
+    REQUIRE(pr.doc != nullptr);
+    REQUIRE(fdl_doc_contexts_count(pr.doc) == 0);
+    REQUIRE(fdl_doc_context_at(pr.doc, 0) == nullptr);
+    fdl_doc_free(pr.doc);
 }
