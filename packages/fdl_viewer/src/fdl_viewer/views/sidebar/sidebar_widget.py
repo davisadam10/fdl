@@ -202,8 +202,8 @@ class SidebarWidget(QWidget):
         # When preset mode changes, update the transform button
         self._update_transform_button()
 
-    @Slot(str, str, str)
-    def _on_selection_changed(self, context: str, canvas: str, framing: str) -> None:
+    @Slot(int, str, str)
+    def _on_selection_changed(self, context: int, canvas: str, framing: str) -> None:
         """Handle selection change."""
         self._update_transform_button()
 
@@ -232,6 +232,7 @@ class SidebarWidget(QWidget):
         # When a transform completes, mark template as not modified
         if fdl_model is not None:
             self._has_output = True
+            self._app_state.set_template_modified(False)
         self._update_transform_button()
 
     def _update_transform_button(self) -> None:

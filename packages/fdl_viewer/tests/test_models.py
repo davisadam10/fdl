@@ -168,6 +168,17 @@ class TestFDLModel:
 class TestRecentFilesModel:
     """Tests for RecentFilesModel."""
 
+    @pytest.fixture(autouse=True)
+    def _isolate_qsettings(self, tmp_path):
+        """Redirect QSettings to tmp_path so tests never overwrite real user settings."""
+        from PySide6.QtCore import QSettings
+
+        prev_format = QSettings.defaultFormat()
+        QSettings.setDefaultFormat(QSettings.Format.IniFormat)
+        QSettings.setPath(QSettings.Format.IniFormat, QSettings.Scope.UserScope, str(tmp_path / "qsettings"))
+        yield
+        QSettings.setDefaultFormat(prev_format)
+
     def test_add_file(self, qapp, tmp_path):
         """Test adding a file to recent files."""
         # Create a real file to add (RecentFilesModel filters non-existent files)

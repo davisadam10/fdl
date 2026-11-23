@@ -434,11 +434,11 @@ class DetailsTab(QWidget):
     def _on_transform_result(self, result) -> None:
         """Handle transform result."""
         if result:
-            from fdl import ATTR_SCALED_BOUNDING_BOX
+            from fdl import ATTR_SCALE_FACTOR
 
-            sbb = result.canvas.get_custom_attr(ATTR_SCALED_BOUNDING_BOX)
-            if sbb:
-                self._scale_label.setText(f"{sbb.width:.4f} x {sbb.height:.4f}")
+            sf = result.canvas.get_custom_attr(ATTR_SCALE_FACTOR)
+            if sf is not None:
+                self._scale_label.setText(f"{sf:.4f}")
 
     @Slot()
     def _on_copy_clicked(self) -> None:
