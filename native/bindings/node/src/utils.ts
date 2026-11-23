@@ -41,7 +41,14 @@ export function makeRect(
 /** Parse an FDL document from a JSON string. */
 export function readFromString(json: string, validate = true): FDL {
   const doc = FDL.parse(json);
-  if (validate) doc.validate();
+  if (validate) {
+    try {
+      doc.validate();
+    } catch (e) {
+      doc.close();
+      throw e;
+    }
+  }
   return doc;
 }
 
@@ -85,6 +92,8 @@ export function getDimensionsFromPath(
   if (cPath === undefined) {
     throw new Error(`Unsupported source path: ${path}`);
   }
+  canvas._checkHandle();
+  framing._checkHandle();
   const result = addon.fdl_resolve_geometry_layer(
     (canvas as any)._handle,
     (framing as any)._handle,
@@ -122,6 +131,8 @@ export function getAnchorFromPath(
   if (cPath === undefined) {
     throw new Error(`Unsupported source path for anchor point: ${path}`);
   }
+  canvas._checkHandle();
+  framing._checkHandle();
   const result = addon.fdl_resolve_geometry_layer(
     (canvas as any)._handle,
     (framing as any)._handle,

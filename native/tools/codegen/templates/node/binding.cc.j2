@@ -21,6 +21,9 @@
 // -----------------------------------------------------------------------
 
 static void* UnwrapHandle(const Napi::Value& val) {
+    if (!val.IsExternal()) {
+        return nullptr;
+    }
     return val.As<Napi::External<void>>().Data();
 }
 
@@ -121,9 +124,7 @@ Napi::Value {{ fn.wrapper_name }}(const Napi::CallbackInfo& info) {
     return Napi::String::New(env, _result);
 {% elif fn.return_kind == "handle" %}
     auto* _r = {{ fn.name }}({{ fn.call_args_str }});
-{% if fn.return_nullable %}
     if (!_r) return env.Null();
-{% endif %}
     return Napi::External<void>::New(env, _r);
 {% elif fn.return_kind == "number" %}
     auto _r = {{ fn.name }}({{ fn.call_args_str }});

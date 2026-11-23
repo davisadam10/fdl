@@ -20,6 +20,9 @@
 // -----------------------------------------------------------------------
 
 static void* UnwrapHandle(const Napi::Value& val) {
+    if (!val.IsExternal()) {
+        return nullptr;
+    }
     return val.As<Napi::External<void>>().Data();
 }
 
@@ -110,6 +113,9 @@ Napi::Value Wrap_fdl_canvas_add_framing_decision(const Napi::CallbackInfo& info)
     double anchor_y = info[7].As<Napi::Number>().DoubleValue();
     auto* _r = fdl_canvas_add_framing_decision(
         canvas, id_str.c_str(), label_str.c_str(), framing_intent_id_str.c_str(), dim_w, dim_h, anchor_x, anchor_y);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -131,6 +137,9 @@ Napi::Value Wrap_fdl_canvas_framing_decision_at(const Napi::CallbackInfo& info) 
     auto* canvas = static_cast<fdl_canvas_t*>(UnwrapHandle(info[0]));
     uint32_t index = info[1].As<Napi::Number>().Uint32Value();
     auto* _r = fdl_canvas_framing_decision_at(canvas, index);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -516,6 +525,9 @@ Napi::Value Wrap_fdl_clip_id_sequence(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     auto* cid = static_cast<fdl_clip_id_t*>(UnwrapHandle(info[0]));
     auto* _r = fdl_clip_id_sequence(cid);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -574,6 +586,9 @@ Napi::Value Wrap_fdl_context_add_canvas(const Napi::CallbackInfo& info) {
     double squeeze = info[6].As<Napi::Number>().DoubleValue();
     auto* _r = fdl_context_add_canvas(
         ctx, id_str.c_str(), label_str.c_str(), source_canvas_id_str.c_str(), dim_w, dim_h, squeeze);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -583,6 +598,9 @@ Napi::Value Wrap_fdl_context_canvas_at(const Napi::CallbackInfo& info) {
     auto* ctx = static_cast<fdl_context_t*>(UnwrapHandle(info[0]));
     uint32_t index = info[1].As<Napi::Number>().Uint32Value();
     auto* _r = fdl_context_canvas_at(ctx, index);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -599,6 +617,9 @@ Napi::Value Wrap_fdl_context_clip_id(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     auto* ctx = static_cast<fdl_context_t*>(UnwrapHandle(info[0]));
     auto* _r = fdl_context_clip_id(ctx);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -858,6 +879,9 @@ Napi::Value Wrap_fdl_doc_add_canvas_template(const Napi::CallbackInfo& info) {
         halign,
         valign,
         rounding);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -870,6 +894,9 @@ Napi::Value Wrap_fdl_doc_add_context(const Napi::CallbackInfo& info) {
     std::string context_creator_str = context_creator_is_null ? std::string() : info[2].As<Napi::String>().Utf8Value();
     auto* _r =
         fdl_doc_add_context(doc, label_str.c_str(), (context_creator_is_null ? nullptr : context_creator_str.c_str()));
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -883,6 +910,9 @@ Napi::Value Wrap_fdl_doc_add_framing_intent(const Napi::CallbackInfo& info) {
     int64_t aspect_h = static_cast<int64_t>(info[4].As<Napi::Number>().Int64Value());
     double protection = info[5].As<Napi::Number>().DoubleValue();
     auto* _r = fdl_doc_add_framing_intent(doc, id_str.c_str(), label_str.c_str(), aspect_w, aspect_h, protection);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -892,6 +922,9 @@ Napi::Value Wrap_fdl_doc_canvas_template_at(const Napi::CallbackInfo& info) {
     auto* doc = static_cast<fdl_doc_t*>(UnwrapHandle(info[0]));
     uint32_t index = info[1].As<Napi::Number>().Uint32Value();
     auto* _r = fdl_doc_canvas_template_at(doc, index);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -921,6 +954,9 @@ Napi::Value Wrap_fdl_doc_context_at(const Napi::CallbackInfo& info) {
     auto* doc = static_cast<fdl_doc_t*>(UnwrapHandle(info[0]));
     uint32_t index = info[1].As<Napi::Number>().Uint32Value();
     auto* _r = fdl_doc_context_at(doc, index);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -948,6 +984,9 @@ Napi::Value Wrap_fdl_doc_contexts_count(const Napi::CallbackInfo& info) {
 Napi::Value Wrap_fdl_doc_create(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     auto* _r = fdl_doc_create();
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -967,6 +1006,9 @@ Napi::Value Wrap_fdl_doc_create_with_header(const Napi::CallbackInfo& info) {
         version_minor,
         fdl_creator_str.c_str(),
         (default_framing_intent_is_null ? nullptr : default_framing_intent_str.c_str()));
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -976,6 +1018,9 @@ Napi::Value Wrap_fdl_doc_framing_intent_at(const Napi::CallbackInfo& info) {
     auto* doc = static_cast<fdl_doc_t*>(UnwrapHandle(info[0]));
     uint32_t index = info[1].As<Napi::Number>().Uint32Value();
     auto* _r = fdl_doc_framing_intent_at(doc, index);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
@@ -1110,6 +1155,9 @@ Napi::Value Wrap_fdl_doc_validate(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     auto* doc = static_cast<fdl_doc_t*>(UnwrapHandle(info[0]));
     auto* _r = fdl_doc_validate(doc);
+    if (!_r) {
+        return env.Null();
+    }
     return Napi::External<void>::New(env, _r);
 }
 
