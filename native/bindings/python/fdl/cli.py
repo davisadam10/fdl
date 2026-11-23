@@ -39,7 +39,8 @@ def main(args: list[str] | None = None) -> int:
             continue
 
         try:
-            read_from_file(path, validate=True)
+            with read_from_file(path, validate=True):
+                pass
             print(f"OK    {path}")
         except FDLValidationError as e:
             print(f"FAIL  {path}:\n{e}", file=sys.stderr)

@@ -50,6 +50,8 @@ class HandleWrapper:
     def _check_handle(self):
         if self._handle is None:
             raise RuntimeError(f"{type(self).__name__} handle has been freed")
+        if self._doc_ref is not None and getattr(self._doc_ref, "_closed", False):
+            raise RuntimeError(f"{type(self).__name__} owning document has been closed")
 
 
 class OwnedHandle(HandleWrapper):
@@ -102,6 +104,7 @@ class OwnedHandle(HandleWrapper):
                 self._free_fn(self._handle)
                 self._handle = None
                 self._closed = True
+                self._doc_ref = None  # break self-reference cycle immediately
 
     def __enter__(self):
         return self
@@ -111,12 +114,14 @@ class OwnedHandle(HandleWrapper):
 
     def __del__(self):
         if not self._closed and self._handle is not None:
-            warnings.warn(
-                f"{type(self).__name__} was not closed explicitly. Use 'with' or call .close().",
-                ResourceWarning,
-                stacklevel=2,
-            )
-            self.close()
+            try:
+                warnings.warn(
+                    f"{type(self).__name__} was not closed explicitly. Use 'with' or call .close().",
+                    ResourceWarning,
+                    stacklevel=2,
+                )
+            finally:
+                self.close()
 
 
 # -----------------------------------------------------------------------
@@ -162,10 +167,16 @@ class CollectionWrapper(Generic[T]):
         self._find_by_label_fn = find_by_label_fn
         self._doc_ref = doc_ref
 
+    def _check_collection(self):
+        if self._doc_ref is not None and getattr(self._doc_ref, "_closed", False):
+            raise RuntimeError("Collection owning document has been closed")
+
     def __len__(self) -> int:
+        self._check_collection()
         return self._count_fn(self._parent_handle)
 
     def __getitem__(self, index: int) -> T:
+        self._check_collection()
         length = len(self)
         if index < 0:
             index += length
@@ -189,6 +200,7 @@ class CollectionWrapper(Generic[T]):
 
     def get_by_id(self, id_str: str):
         """Find item by ID (or label for Context). Returns None if not found."""
+        self._check_collection()
         if self._find_by_id_fn is not None:
             raw = self._find_by_id_fn(self._parent_handle, id_str.encode("utf-8"))
             if raw != ffi.NULL:

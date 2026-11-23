@@ -164,6 +164,8 @@ def get_dimensions_from_path(
     if c_path is None:
         raise ValueError(f"Unsupported source path: {path}")
 
+    canvas._check_handle()
+    framing._check_handle()
     out_dims = ffi.new("fdl_dimensions_f64_t*")
     out_anchor = ffi.new("fdl_point_f64_t*")
     rc = get_lib().fdl_resolve_geometry_layer(
@@ -213,6 +215,8 @@ def get_anchor_from_path(canvas: Canvas, framing: FramingDecision, path: str) ->
     if c_path is None:
         raise ValueError(f"Unsupported source path for anchor point: {path}")
 
+    canvas._check_handle()
+    framing._check_handle()
     out_dims = ffi.new("fdl_dimensions_f64_t*")
     out_anchor = ffi.new("fdl_point_f64_t*")
     rc = get_lib().fdl_resolve_geometry_layer(
@@ -261,7 +265,11 @@ def read_from_string(s: str, validate: bool = True) -> FDL:
 
     fdl = _FDL.parse(s.encode("utf-8"))
     if validate:
-        fdl.validate()
+        try:
+            fdl.validate()
+        except BaseException:
+            fdl.close()
+            raise
     return fdl
 
 
@@ -300,7 +308,11 @@ def read_from_file(file_path: Path | str, validate: bool = True) -> FDL:
 
     fdl = _FDL.parse(raw)
     if validate:
-        fdl.validate()
+        try:
+            fdl.validate()
+        except BaseException:
+            fdl.close()
+            raise
     return fdl
 
 
