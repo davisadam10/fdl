@@ -99,11 +99,12 @@ describe("other enum-taking functions reject invalid enums", () => {
       const template = addTemplate(doc, {
         fitSource: GeometryPath.CANVAS_DIMENSIONS,
       });
-      const before = template.fitSource;
+      template.preserveFromSourceCanvas = GeometryPath.CANVAS_DIMENSIONS;
+      const before = template.preserveFromSourceCanvas;
       expect(() => {
-        template.fitSource = bad<GeometryPath>();
+        template.preserveFromSourceCanvas = bad<GeometryPath>();
       }).toThrow(TypeError);
-      expect(template.fitSource).toBe(before);
+      expect(template.preserveFromSourceCanvas).toBe(before);
     } finally {
       doc.close();
     }

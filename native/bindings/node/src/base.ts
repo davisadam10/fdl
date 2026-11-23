@@ -15,12 +15,27 @@ import type { NativeAddon } from "./ffi/index.js";
 import { getAddon } from "./ffi/index.js";
 
 // -----------------------------------------------------------------------
-// Finalization warning
+// Finalization cleanup + warning
 // -----------------------------------------------------------------------
 
-const _registry = new FinalizationRegistry<string>((msg: string) => {
-  // eslint-disable-next-line no-console
-  console.warn(msg);
+interface FinalizeToken {
+  handle: object;
+  freeFn: string;
+  msg: string;
+  state: { closed: boolean };
+}
+
+const _registry = new FinalizationRegistry<FinalizeToken>((token) => {
+  if (!token.state.closed) {
+    token.state.closed = true;
+    // eslint-disable-next-line no-console
+    console.warn(token.msg);
+    try {
+      getAddon()[token.freeFn](token.handle);
+    } catch {
+      // Addon may already be torn down at process exit.
+    }
+  }
 });
 
 // -----------------------------------------------------------------------
@@ -79,7 +94,7 @@ export class HandleWrapper {
    * @internal Take ownership of the hidden backing document of a standalone object.
    *
    * The backing document is created by the generated constructor and is not
-   * visible to the caller, so the finalization warning is moved onto this
+   * visible to the caller, so the finalization cleanup is moved onto this
    * object, where it names the class the caller actually created.
    */
   protected _adoptBackingDoc(backing: OwnedHandle): void {
@@ -87,8 +102,14 @@ export class HandleWrapper {
     _registry.unregister(backing);
     _registry.register(
       this,
-      `${this.constructor.name} was garbage collected without being closed. ` +
-        `Call .close() or use 'using' syntax.`,
+      {
+        handle: backing._handle,
+        freeFn: backing._getFreeFn(),
+        msg:
+          `${this.constructor.name} was garbage collected without being closed. ` +
+          `Call .close() or use 'using' syntax.`,
+        state: backing._getFinalizeState(),
+      },
       this,
     );
   }
@@ -118,8 +139,8 @@ export class HandleWrapper {
     return this._closed;
   }
 
-  /** Check that the handle is still valid. Throws if it or its document is closed. */
-  protected _checkHandle(): void {
+  /** @internal Check that the handle is still valid. Throws if it or its document is closed. */
+  _checkHandle(): void {
     if (this._handle === null || this._closed) {
       throw new Error("Handle has been closed or freed");
     }
@@ -145,10 +166,11 @@ export class HandleWrapper {
  * Supports:
  *   - Explicit `close()` method
  *   - `using` syntax via `Symbol.dispose` (TC39 Explicit Resource Management)
- *   - FinalizationRegistry warning if not closed
+ *   - FinalizationRegistry warning + native free if not closed
  */
 export class OwnedHandle extends HandleWrapper {
   private _freeFn: string;
+  private _finalizeState = { closed: false };
 
   /** @internal */
   constructor(handle: object, freeFn: string) {
@@ -156,18 +178,35 @@ export class OwnedHandle extends HandleWrapper {
     this._docRef = this; // self-reference
     this._freeFn = freeFn;
 
-    // Register GC warning
+    // Register GC warning + native cleanup
     _registry.register(
       this,
-      `FDL document was garbage collected without being closed. ` +
-        `Call .close() or use 'using' syntax.`,
+      {
+        handle,
+        freeFn,
+        msg:
+          `FDL document was garbage collected without being closed. ` +
+          `Call .close() or use 'using' syntax.`,
+        state: this._finalizeState,
+      },
       this,
     );
+  }
+
+  /** @internal */
+  _getFreeFn(): string {
+    return this._freeFn;
+  }
+
+  /** @internal */
+  _getFinalizeState(): { closed: boolean } {
+    return this._finalizeState;
   }
 
   /** Release the underlying C handle. Safe to call multiple times. */
   override close(): void {
     if (!this._closed && this._handle !== null) {
+      this._finalizeState.closed = true;
       this._addon[this._freeFn](this._handle);
       this._handle = null!;
       this._closed = true;
