@@ -45,6 +45,8 @@ void fdl_doc_set_default_framing_intent(fdl_doc_t* doc, const char* fi_id) {
     const doc_lock lock(doc);
     if (fi_id != nullptr) {
         doc->doc.data().insert_or_assign("default_framing_intent", fi_id);
+    } else {
+        doc->doc.data().erase("default_framing_intent");
     }
 }
 

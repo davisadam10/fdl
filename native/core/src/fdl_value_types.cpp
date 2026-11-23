@@ -6,6 +6,7 @@
  */
 #include "fdl/fdl_core.h"
 #include "fdl_constants.h"
+#include "fdl_rounding.h"
 
 #include <algorithm>
 #include <cmath>
@@ -28,6 +29,9 @@ namespace {
  * @return True if the values are within tolerance.
  */
 bool fp_close(double a, double b) {
+    if (a == b) {
+        return true;
+    }
     double const diff = std::abs(a - b);
     double const tol = std::max(fdl::constants::kRelTol * std::max(std::abs(a), std::abs(b)), fdl::constants::kAbsTol);
     return diff <= tol;
@@ -93,7 +97,7 @@ fdl_dimensions_f64_t fdl_dimensions_i64_normalize(fdl_dimensions_i64_t dims, dou
 }
 
 fdl_dimensions_i64_t fdl_dimensions_f64_to_i64(fdl_dimensions_f64_t dims) {
-    return {static_cast<int64_t>(dims.width), static_cast<int64_t>(dims.height)};
+    return {fdl::detail::safe_to_int64(dims.width), fdl::detail::safe_to_int64(dims.height)};
 }
 
 int fdl_dimensions_i64_gt(fdl_dimensions_i64_t a, fdl_dimensions_i64_t b) {

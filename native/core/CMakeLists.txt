@@ -47,7 +47,11 @@ execute_process(
     -DFDL_SCHEMA_DIR=${FDL_SCHEMA_DIR}
     -DFDL_SCHEMA_OUT=${FDL_SCHEMA_OUT}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateSchemaHeader.cmake
+  RESULT_VARIABLE _schema_gen_rc
 )
+if(NOT _schema_gen_rc EQUAL 0)
+  message(FATAL_ERROR "GenerateSchemaHeader.cmake failed with exit code ${_schema_gen_rc}")
+endif()
 
 # Allow consumers to opt into a static build of fdl_core. Default remains
 # SHARED so existing users see no behavior change. STATIC enables
@@ -100,7 +104,9 @@ generate_export_header(fdl_core
 
 target_link_libraries(fdl_core PRIVATE jsoncons)
 
-target_compile_definitions(fdl_core PRIVATE fdl_core_EXPORTS)
+if(FDL_CORE_LIBRARY_TYPE STREQUAL "STATIC")
+  target_compile_definitions(fdl_core PUBLIC FDL_CORE_STATIC_DEFINE)
+endif()
 
 # Platform-specific compiler settings
 if(MSVC)
