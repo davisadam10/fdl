@@ -971,7 +971,11 @@ def parse_idl(path: Path, header_path: Path | None = None) -> IDL:
     opaque_types = data.get("opaque_types", [])
 
     # Two modes: new function_metadata overlay (with C header parsing) or legacy functions list
-    if "function_metadata" in data and header_path is not None and header_path.exists():
+    if "function_metadata" in data:
+        if header_path is None or not header_path.exists():
+            raise FileNotFoundError(
+                f"IDL uses function_metadata overlay but C header path is missing or does not exist: {header_path}"
+            )
         functions = _merge_header_overlay(header_path, data["function_metadata"])
     else:
         functions = [_parse_function(f) for f in data.get("functions", [])]

@@ -77,8 +77,8 @@ def _parse_param(raw: str) -> ParsedParam | None:
     # The last token is the name (possibly with leading *)
     name = tokens[-1].lstrip("*")
 
-    # Everything before the name is the type
-    type_part = raw[: raw.rfind(name)].strip()
+    # Everything before the last token is the base type
+    type_part = raw[: raw.rfind(tokens[-1])].strip()
 
     # If name was prefixed with *, the * belongs to the type
     stars_on_name = len(tokens[-1]) - len(name)
@@ -102,8 +102,8 @@ def _extract_doc(doxygen_text: str) -> str:
     for line in doxygen_text.splitlines():
         # Strip leading ' * ' pattern
         cleaned = re.sub(r"^\s*\*\s?", "", line).strip()
-        # Stop at Doxygen tags
-        if re.match(r"@(param|return|anchor|par\b|note|ref|see|brief)\b", cleaned):
+        # Stop at Doxygen tags (keep @brief so it can be stripped below)
+        if re.match(r"@(param|return|anchor|par\b|note|ref|see)\b", cleaned):
             break
         # Stop at blank line (paragraph separator) if we already have content
         if not cleaned and lines:

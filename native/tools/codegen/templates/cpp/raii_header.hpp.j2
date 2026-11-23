@@ -333,9 +333,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return {{ fdl_class.ca_prefix }}set_custom_attr_string({{ fdl_class.handle_field }}, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return {{ fdl_class.ca_prefix }}set_custom_attr_string({{ fdl_class.handle_field }}, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return {{ fdl_class.ca_prefix }}set_custom_attr_int({{ fdl_class.handle_field }}, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return {{ fdl_class.ca_prefix }}set_custom_attr_int({{ fdl_class.handle_field }}, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -614,9 +622,17 @@ public:
     int set_custom_attr(const std::string& name, const std::string& value) {
         return {{ cls.ca_prefix }}set_custom_attr_string({{ cls.handle_field }}, name.c_str(), value.c_str());
     }
+    /** Set a string custom attribute from a C string literal (avoids const char* -> bool overload). */
+    int set_custom_attr(const std::string& name, const char* value) {
+        return {{ cls.ca_prefix }}set_custom_attr_string({{ cls.handle_field }}, name.c_str(), value);
+    }
     /** Set an integer custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, int64_t value) {
         return {{ cls.ca_prefix }}set_custom_attr_int({{ cls.handle_field }}, name.c_str(), value);
+    }
+    /** Set an integer custom attribute from int (avoids ambiguous int -> int64_t/double/bool). */
+    int set_custom_attr(const std::string& name, int value) {
+        return {{ cls.ca_prefix }}set_custom_attr_int({{ cls.handle_field }}, name.c_str(), static_cast<int64_t>(value));
     }
     /** Set a float custom attribute. Returns 0 on success, -1 on type mismatch. */
     int set_custom_attr(const std::string& name, double value) {
@@ -1068,6 +1084,10 @@ inline void write_to_file(const {{ fdl_class.cpp_name }}& doc, const std::string
         throw std::runtime_error("Cannot open file for writing: " + path);
     }
     ofs.write(json.data(), static_cast<std::streamsize>(json.size()));
+    ofs.flush();
+    if (!ofs) {
+        throw std::runtime_error("Failed to write file: " + path);
+    }
 }
 
 {% endif %}

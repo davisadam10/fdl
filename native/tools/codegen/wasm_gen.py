@@ -288,16 +288,13 @@ def _classify_struct_field_embind(c_type: str, name: str) -> dict:
         }
 
     if c_type in ("char*", "const char*"):
-        # NOTE: from_val_* is only generated for completeness; result-type structs
-        # are output-only and never reconverted JS→C at runtime, so the lifetime
-        # of the std::string temporary doesn't matter in practice. We mirror the
-        # pattern used by the N-API path's structs.h so the code compiles.
-        to_c_stmt = f'{{ std::string _s = v["{name}"].as<std::string>(); d.{name} = _s.c_str(); }}'
+        # String struct fields only appear on output-only result structs; never
+        # emit a dangling std::string::c_str() JS->C converter.
         return {
             "name": name,
             "c_type": c_type,
             "kind": "string",
-            "to_c_stmt": to_c_stmt,
+            "to_c_stmt": None,
             "to_c": None,
             "to_js": f"(d.{name} ? emscripten::val(std::string(d.{name})) : emscripten::val::null())",
             "is_nested": False,
