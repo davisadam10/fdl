@@ -41,8 +41,11 @@ struct AttrBufKeyHash {
     }
 };
 
-/** @brief Thread-local bounded string cache for custom attribute string returns. */
+/** @brief Thread-local bounded string cache for custom attribute string values. */
 thread_local fdl::detail::TlStringCache<AttrBufKey, AttrBufKeyHash> tl_cache; // NOLINT
+
+/** @brief Separate thread-local bounded string cache for custom attribute names. */
+thread_local fdl::detail::TlStringCache<AttrBufKey, AttrBufKeyHash> tl_name_cache; // NOLINT
 
 } // namespace
 
@@ -398,7 +401,7 @@ const char* name_at(const ojson* node, uint32_t index) {
             if (cur == index) {
                 // Return the name without the '_' prefix
                 const AttrBufKey bk{reinterpret_cast<uintptr_t>(node), m.key()};
-                auto& buf = tl_cache.get(bk);
+                auto& buf = tl_name_cache.get(bk);
                 // NOLINTNEXTLINE(readability-magic-numbers,cppcoreguidelines-avoid-magic-numbers)
                 buf = m.key().substr(1);
                 return buf.c_str();

@@ -795,7 +795,8 @@ FDL_API fdl_parse_result_t fdl_doc_parse_json(const char* json_str, size_t json_
  * Get the UUID from a parsed FDL document.
  *
  * @param doc  Document to query.
- * @return UUID string, or NULL if not present. Pointer valid until doc is freed.
+ * @return UUID string, or NULL if not present. Pointer is thread-local and valid
+ *         until the next call for the same field on the same thread (or cache eviction).
  */
 FDL_API const char* fdl_doc_get_uuid(const fdl_doc_t* doc);
 
@@ -803,7 +804,8 @@ FDL_API const char* fdl_doc_get_uuid(const fdl_doc_t* doc);
  * Get the fdl_creator from a parsed FDL document.
  *
  * @param doc  Document to query.
- * @return Creator string, or NULL if not present. Pointer valid until doc is freed.
+ * @return Creator string, or NULL if not present. Pointer is thread-local and valid
+ *         until the next call for the same field on the same thread (or cache eviction).
  */
 FDL_API const char* fdl_doc_get_fdl_creator(const fdl_doc_t* doc);
 
@@ -811,7 +813,8 @@ FDL_API const char* fdl_doc_get_fdl_creator(const fdl_doc_t* doc);
  * Get the default_framing_intent from a parsed FDL document.
  *
  * @param doc  Document to query.
- * @return Default framing intent ID, or NULL if not present. Pointer valid until doc is freed.
+ * @return Default framing intent ID, or NULL if not present. Pointer is thread-local and valid
+ *         until the next call for the same field on the same thread (or cache eviction).
  */
 FDL_API const char* fdl_doc_get_default_framing_intent(const fdl_doc_t* doc);
 
