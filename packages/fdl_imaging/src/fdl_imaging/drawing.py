@@ -95,6 +95,8 @@ def draw_horizontal_line(
         ImageBufAlgo.fill(buf, color, roi=roi)
     else:
         dash_on, dash_off = dash_pattern
+        if dash_on <= 0 or dash_off < 0:
+            raise ValueError(f"Invalid dash_pattern {dash_pattern}: dash_on must be > 0 and dash_off >= 0")
         x = x1
         while x < x2:
             dash_end = min(x + dash_on, x2)
@@ -147,6 +149,8 @@ def draw_vertical_line(
         ImageBufAlgo.fill(buf, color, roi=roi)
     else:
         dash_on, dash_off = dash_pattern
+        if dash_on <= 0 or dash_off < 0:
+            raise ValueError(f"Invalid dash_pattern {dash_pattern}: dash_on must be > 0 and dash_off >= 0")
         y = y1
         while y < y2:
             dash_end = min(y + dash_on, y2)
@@ -803,6 +807,8 @@ def draw_grid(
     color : RGBA
         Line color as (r, g, b, a) tuple.
     """
+    if spacing <= 0:
+        raise ValueError(f"Invalid grid spacing {spacing}: spacing must be > 0")
     x = 0
     while x <= width:
         draw_vertical_line(buf, x, 0, height, thickness, color)
