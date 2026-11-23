@@ -53,4 +53,4 @@ repos:
     rev: v19.1.7
     hooks:
       - id: clang-format
-        files: '^native/(core/(src|include|tests)|bindings/cpp)/.*\.(cpp|h|hpp)$'
+        files: '^native/(core/(src|include|tests)|bindings/(cpp|node/src/addon|wasm/src))/.*\.(cpp|cc|h|hpp)$'
