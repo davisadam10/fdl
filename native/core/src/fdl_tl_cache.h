@@ -17,6 +17,7 @@
 #ifndef FDL_TL_CACHE_H
 #define FDL_TL_CACHE_H
 
+#include <deque>
 #include <string>
 #include <unordered_map>
 
@@ -25,10 +26,11 @@
 namespace fdl::detail {
 
 /**
- * @brief Bounded thread-local string cache with auto-eviction.
+ * @brief Bounded thread-local string cache with FIFO single-entry eviction.
  *
- * When the number of cached entries reaches @c fdl::constants::kTlCacheMaxEntries,
- * the cache is cleared entirely before the new entry is inserted.
+ * When inserting a new key at @c fdl::constants::kTlCacheMaxEntries capacity,
+ * only the oldest cached entry is evicted so recently returned pointers for
+ * other keys remain valid (leveraging std::unordered_map reference stability).
  *
  * @tparam Key   Cache key type (must be hashable and equality-comparable).
  * @tparam Hash  Hash functor for @p Key.
@@ -38,22 +40,29 @@ public:
     /**
      * @brief Get or create a cached string entry for the given key.
      *
-     * If the cache exceeds the size limit, it is cleared first.
-     * The returned reference is valid until the next call to get() that
-     * triggers eviction.
+     * If inserting a new key would exceed the size limit, the oldest entry is
+     * evicted first. Existing entries for other keys remain valid until they
+     * are themselves evicted.
      *
      * @param key  The cache key to look up.
      * @return Reference to the cached string (may be empty if newly created).
      */
     std::string& get(const Key& key) {
-        if (map_.size() >= fdl::constants::kTlCacheMaxEntries) {
-            map_.clear();
+        auto it = map_.find(key);
+        if (it != map_.end()) {
+            return it->second;
         }
+        if (map_.size() >= fdl::constants::kTlCacheMaxEntries && !order_.empty()) {
+            map_.erase(order_.front());
+            order_.pop_front();
+        }
+        order_.push_back(key);
         return map_[key];
     }
 
 private:
     std::unordered_map<Key, std::string, Hash> map_;
+    std::deque<Key> order_;
 };
 
 } // namespace fdl::detail

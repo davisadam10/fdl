@@ -727,3 +727,56 @@ TEST_CASE("Composite attrs on sub-handle types", "[custom_attr][composite][subha
 
     fdl_doc_free(doc);
 }
+
+TEST_CASE("Custom attr name_at does not alias get_string buffer", "[custom_attr][tl_cache]") {
+    fdl_doc_t* doc = make_doc();
+    const std::string long_val(128, 'V');
+    REQUIRE(fdl_doc_set_custom_attr_string(doc, "alpha", long_val.c_str()) == 0);
+    REQUIRE(fdl_doc_set_custom_attr_string(doc, "beta", "short_val") == 0);
+
+    const uint32_t n = fdl_doc_custom_attrs_count(doc);
+    REQUIRE(n == 2);
+    for (uint32_t i = 0; i < n; ++i) {
+        const char* name = fdl_doc_custom_attr_name_at(doc, i);
+        REQUIRE(name != nullptr);
+        const std::string expected_name(name);
+        const char* val = fdl_doc_get_custom_attr_string(doc, name);
+        REQUIRE(val != nullptr);
+        // name must remain intact after get_string() writes to the value cache
+        REQUIRE(std::string(name) == expected_name);
+        if (expected_name == "alpha") {
+            REQUIRE(std::string(val) == long_val);
+        } else {
+            REQUIRE(std::string(val) == "short_val");
+        }
+    }
+
+    fdl_doc_free(doc);
+}
+
+TEST_CASE("TlStringCache FIFO eviction preserves recently returned pointers", "[custom_attr][tl_cache]") {
+    fdl_doc_t* doc = make_doc();
+    // Populate more than kTlCacheMaxEntries (256) distinct string attributes
+    for (int i = 0; i < 270; ++i) {
+        const std::string key = "k_" + std::to_string(i);
+        const std::string val = "value_payload_" + std::to_string(i);
+        REQUIRE(fdl_doc_set_custom_attr_string(doc, key.c_str(), val.c_str()) == 0);
+    }
+
+    // Access keys 0..255 (filling cache), keeping pointer to key 255
+    const char* recent_ptr = nullptr;
+    for (int i = 0; i < 256; ++i) {
+        const std::string key = "k_" + std::to_string(i);
+        recent_ptr = fdl_doc_get_custom_attr_string(doc, key.c_str());
+        REQUIRE(recent_ptr != nullptr);
+    }
+    REQUIRE(std::string(recent_ptr) == "value_payload_255");
+
+    // Accessing key 256 should evict only the oldest entry (k_0), NOT k_255
+    const char* next_ptr = fdl_doc_get_custom_attr_string(doc, "k_256");
+    REQUIRE(next_ptr != nullptr);
+    REQUIRE(std::string(next_ptr) == "value_payload_256");
+    REQUIRE(std::string(recent_ptr) == "value_payload_255");
+
+    fdl_doc_free(doc);
+}
