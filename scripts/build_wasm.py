@@ -65,9 +65,10 @@ def run_codegen() -> int:
 def configure(build_type: str) -> int:
     print(f"=== emcmake configure ({build_type}) ===")
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    emcmake = shutil.which("emcmake") or "emcmake"
     return subprocess.run(
         [
-            "emcmake",
+            emcmake,
             "cmake",
             "-S",
             str(WASM_DIR),
@@ -101,15 +102,17 @@ def copy_artifacts() -> int:
         print(f"ERROR: build output dir not found: {src_dist}", file=sys.stderr)
         return 1
     NODE_WASM_OUT.mkdir(parents=True, exist_ok=True)
+    required = ("fdl_module.mjs", "fdl_module.wasm")
+    missing = [name for name in required if not (src_dist / name).is_file()]
+    if missing:
+        print(f"ERROR: missing required WASM artifacts in {src_dist}: {', '.join(missing)}", file=sys.stderr)
+        return 1
     copied: list[str] = []
     for pattern in ("fdl_module.mjs", "fdl_module.wasm", "fdl_module.wasm.map"):
         for f in src_dist.glob(pattern):
             dst = NODE_WASM_OUT / f.name
             shutil.copy2(f, dst)
             copied.append(str(dst))
-    if not copied:
-        print(f"ERROR: no WASM artifacts produced in {src_dist}", file=sys.stderr)
-        return 1
     print("=== Copied artifacts ===")
     for c in copied:
         print(f"  {c}")

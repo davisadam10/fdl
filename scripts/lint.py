@@ -71,9 +71,9 @@ def filter_clang_tidy_output(output: str) -> tuple[list[str], int]:
         filepath = m.group(1)
         # Make path relative to repo root for consistent matching
         try:
-            rel = str(Path(filepath).resolve().relative_to(REPO_ROOT))
+            rel = Path(filepath).resolve().relative_to(REPO_ROOT).as_posix()
         except ValueError:
-            rel = filepath
+            rel = filepath.replace("\\", "/")
         if any(rel.startswith(p) for p in OUR_CODE_PREFIXES):
             our_warnings.append(line)
         else:
@@ -272,6 +272,9 @@ class ClangTidy(LintStep):
             for w in our_warnings:
                 print(f"    {w}")
             return False, ", ".join(msg_parts)
+
+        if r.returncode != 0 and dep_count == 0:
+            return False, f"run-clang-tidy exited with code {r.returncode}"
 
         return True, detail
 

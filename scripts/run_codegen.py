@@ -20,9 +20,12 @@ TOOLS_DIR = REPO_ROOT / "native" / "tools"
 
 def _project_python() -> str:
     """Return the Python interpreter inside the project .venv, falling back to sys.executable."""
-    venv_python = REPO_ROOT / ".venv" / "bin" / "python"
-    if venv_python.exists():
-        return str(venv_python)
+    for candidate in (
+        REPO_ROOT / ".venv" / "bin" / "python",
+        REPO_ROOT / ".venv" / "Scripts" / "python.exe",
+    ):
+        if candidate.exists():
+            return str(candidate)
     return sys.executable
 
 
@@ -154,9 +157,10 @@ def run_codegen() -> int:
             ts_files.extend(str(f) for f in d.rglob("*.ts"))
     if ts_files:
         node_dir = REPO_ROOT / "native" / "bindings" / "node"
+        npx = shutil.which("npx") or "npx"
         try:
             pfmt = subprocess.run(
-                ["npx", "prettier", "--write", *ts_files],
+                [npx, "prettier", "--write", *ts_files],
                 cwd=node_dir,
                 check=False,
             )
