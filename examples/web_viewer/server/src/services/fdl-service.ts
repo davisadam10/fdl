@@ -161,10 +161,15 @@ export function parseFdlFromString(json: string): {
   hierarchy: FdlHierarchy;
 } {
   const fdl = readFromString(json, true);
-  const hierarchy = extractHierarchy(fdl);
-  const sessionId = uuidv4();
-  sessions.set(sessionId, { fdl, hierarchy, createdAt: Date.now() });
-  return { sessionId, hierarchy };
+  try {
+    const hierarchy = extractHierarchy(fdl);
+    const sessionId = uuidv4();
+    sessions.set(sessionId, { fdl, hierarchy, createdAt: Date.now() });
+    return { sessionId, hierarchy };
+  } catch (err) {
+    fdl.close();
+    throw err;
+  }
 }
 
 export function parseFdlFromFile(filePath: string): {
@@ -172,10 +177,15 @@ export function parseFdlFromFile(filePath: string): {
   hierarchy: FdlHierarchy;
 } {
   const fdl = readFromFile(filePath, true);
-  const hierarchy = extractHierarchy(fdl);
-  const sessionId = uuidv4();
-  sessions.set(sessionId, { fdl, hierarchy, createdAt: Date.now() });
-  return { sessionId, hierarchy };
+  try {
+    const hierarchy = extractHierarchy(fdl);
+    const sessionId = uuidv4();
+    sessions.set(sessionId, { fdl, hierarchy, createdAt: Date.now() });
+    return { sessionId, hierarchy };
+  } catch (err) {
+    fdl.close();
+    throw err;
+  }
 }
 
 export function getSession(sessionId: string): FdlSession | undefined {

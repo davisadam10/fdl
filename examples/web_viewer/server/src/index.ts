@@ -20,6 +20,9 @@ app.use(express.text({ limit: "10mb" }));
 app.use("/api/fdl", fdlRoutes);
 app.use("/api/presets", presetsRoutes);
 app.use("/api/image", imageRoutes);
+app.use("/api", (_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
 
 // Serve static client build in production
 const clientDist = path.resolve(__dirname, "../../client/dist");

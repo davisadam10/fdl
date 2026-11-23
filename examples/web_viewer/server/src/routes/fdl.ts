@@ -54,7 +54,8 @@ router.get("/:id", (req, res) => {
 
 // Get FDL as formatted JSON
 router.get("/:id/json", (req, res) => {
-  const indent = parseInt(req.query.indent as string) || 2;
+  const parsedIndent = parseInt(req.query.indent as string, 10);
+  const indent = Number.isNaN(parsedIndent) ? 2 : Math.min(Math.max(parsedIndent, 0), 8);
   const json = getFdlJson(req.params.id, indent);
   if (!json) {
     res.status(404).json({ error: "Session not found" });
@@ -104,9 +105,14 @@ router.get("/:id/geometry", (req, res) => {
 router.post("/transform", (req, res) => {
   try {
     const body = req.body as TransformRequest;
+    const contextIndex = parseContextIndex(body.contextIndex);
+    if (contextIndex === null) {
+      res.status(400).json({ error: "contextIndex must be a non-negative integer" });
+      return;
+    }
     const result = applyTransform(
       body.sourceSessionId,
-      body.contextIndex,
+      contextIndex,
       body.canvasId,
       body.framingId,
       body.template,

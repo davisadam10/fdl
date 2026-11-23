@@ -1,3 +1,4 @@
+import path from "path";
 import { Router } from "express";
 import { imageUpload } from "../middleware/upload.js";
 import {
@@ -73,11 +74,11 @@ router.get("/:id/download", (req, res) => {
     res.status(404).json({ error: "Image not found" });
     return;
   }
+  const base = path.basename(meta.originalName || "image.png");
+  const stem = base.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9._-]/g, "_") || "image";
+  const safeName = `${stem}.png`;
   res.setHeader("Content-Type", meta.mimeType);
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${meta.originalName}"`,
-  );
+  res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
   res.sendFile(meta.filePath);
 });
 
