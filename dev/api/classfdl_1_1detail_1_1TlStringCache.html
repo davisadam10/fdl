@@ -93,7 +93,7 @@ $(function(){initNavTree('classfdl_1_1detail_1_1TlStringCache.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Bounded thread-local string cache with auto-eviction.  
+<p>Bounded thread-local string cache with FIFO single-entry eviction.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="fdl__tl__cache_8h_source.html">fdl_tl_cache.h</a>&gt;</code></p>
@@ -105,8 +105,8 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename Key, typename Hash&gt;<br />
-class fdl::detail::TlStringCache&lt; Key, Hash &gt;</div><p>Bounded thread-local string cache with auto-eviction. </p>
-<p>When the number of cached entries reaches <code><a class="el" href="fdl__constants_8h.html#a90722df5048f24dc5517ce450fa83f23" title="Max entries before a thread-local string cache auto-clears.">fdl::constants::kTlCacheMaxEntries</a></code>, the cache is cleared entirely before the new entry is inserted.</p>
+class fdl::detail::TlStringCache&lt; Key, Hash &gt;</div><p>Bounded thread-local string cache with FIFO single-entry eviction. </p>
+<p>When inserting a new key at <code><a class="el" href="fdl__constants_8h.html#a90722df5048f24dc5517ce450fa83f23" title="Max entries before a thread-local string cache auto-clears.">fdl::constants::kTlCacheMaxEntries</a></code> capacity, only the oldest cached entry is evicted so recently returned pointers for other keys remain valid (leveraging std::unordered_map reference stability).</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Key</td><td>Cache key type (must be hashable and equality-comparable). </td></tr>
@@ -141,7 +141,7 @@ template&lt;typename Key, typename Hash&gt; </div>
 </div><div class="memdoc">
 
 <p>Get or create a cached string entry for the given key. </p>
-<p>If the cache exceeds the size limit, it is cleared first. The returned reference is valid until the next call to <a class="el" href="#a7017b7ecab648061be58fea71e9e07d0" title="Get or create a cached string entry for the given key.">get()</a> that triggers eviction.</p>
+<p>If inserting a new key would exceed the size limit, the oldest entry is evicted first. Existing entries for other keys remain valid until they are themselves evicted.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">key</td><td>The cache key to look up. </td></tr>

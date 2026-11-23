@@ -203,6 +203,8 @@ Functions</h2></td></tr>
 <p>&lt; POSIX strdup.</p>
 <p>&lt; POSIX strdup.</p>
 <p>&lt; POSIX strdup.</p>
+<p>&lt; POSIX strdup.</p>
+<p>&lt; POSIX strdup.</p>
 
 </div>
 </div>
@@ -228,7 +230,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>UUID string, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>UUID string, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>
@@ -254,7 +256,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Creator string, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Creator string, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>
@@ -280,7 +282,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Default framing intent ID, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Default framing intent ID, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>

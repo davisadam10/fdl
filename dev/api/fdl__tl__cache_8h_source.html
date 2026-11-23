@@ -97,35 +97,43 @@ $(function(){initNavTree('fdl__tl__cache_8h_source.html','',''); });
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifndef FDL_TL_CACHE_H</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define FDL_TL_CACHE_H</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="fdl__constants_8h.html">fdl_constants.h</a>&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span>fdl::detail {</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
-<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classfdl_1_1detail_1_1TlStringCache.html">   36</a></span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">typename</span> Hash&gt; <span class="keyword">class </span><a class="code hl_class" href="classfdl_1_1detail_1_1TlStringCache.html">TlStringCache</a> {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">   48</a></span>    std::string&amp; <a class="code hl_function" href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">get</a>(<span class="keyword">const</span> Key&amp; key) {</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">if</span> (map_.size() &gt;= <a class="code hl_variable" href="fdl__constants_8h.html#a90722df5048f24dc5517ce450fa83f23">fdl::constants::kTlCacheMaxEntries</a>) {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>            map_.clear();</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordflow">return</span> map_[key];</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    }</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;deque&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="fdl__constants_8h.html">fdl_constants.h</a>&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">namespace </span>fdl::detail {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span></div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="};">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classfdl_1_1detail_1_1TlStringCache.html">   38</a></span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">typename</span> Hash&gt; <span class="keyword">class </span><a class="code hl_class" href="classfdl_1_1detail_1_1TlStringCache.html">TlStringCache</a> {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">   50</a></span>    std::string&amp; <a class="code hl_function" href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">get</a>(<span class="keyword">const</span> Key&amp; key) {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keyword">auto</span> it = map_.find(key);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordflow">if</span> (it != map_.end()) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            <span class="keywordflow">return</span> it-&gt;second;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keywordflow">if</span> (map_.size() &gt;= <a class="code hl_variable" href="fdl__constants_8h.html#a90722df5048f24dc5517ce450fa83f23">fdl::constants::kTlCacheMaxEntries</a> &amp;&amp; !order_.empty()) {</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>            map_.erase(order_.front());</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            order_.pop_front();</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        }</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        order_.push_back(key);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">return</span> map_[key];</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
 </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    std::unordered_map&lt;Key, std::string, Hash&gt; map_;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>};</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    std::unordered_map&lt;Key, std::string, Hash&gt; map_;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    std::deque&lt;Key&gt; order_;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>};</div>
 </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>} <span class="comment">// namespace fdl::detail</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#endif </span><span class="comment">// FDL_TL_CACHE_H</span></div>
-<div class="ttc" id="aclassfdl_1_1detail_1_1TlStringCache_html"><div class="ttname"><a href="classfdl_1_1detail_1_1TlStringCache.html">fdl::detail::TlStringCache</a></div><div class="ttdoc">Bounded thread-local string cache with auto-eviction.</div><div class="ttdef"><b>Definition</b> fdl_tl_cache.h:36</div></div>
-<div class="ttc" id="aclassfdl_1_1detail_1_1TlStringCache_html_a7017b7ecab648061be58fea71e9e07d0"><div class="ttname"><a href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">fdl::detail::TlStringCache::get</a></div><div class="ttdeci">std::string &amp; get(const Key &amp;key)</div><div class="ttdoc">Get or create a cached string entry for the given key.</div><div class="ttdef"><b>Definition</b> fdl_tl_cache.h:48</div></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>} <span class="comment">// namespace fdl::detail</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#endif </span><span class="comment">// FDL_TL_CACHE_H</span></div>
+<div class="ttc" id="aclassfdl_1_1detail_1_1TlStringCache_html"><div class="ttname"><a href="classfdl_1_1detail_1_1TlStringCache.html">fdl::detail::TlStringCache</a></div><div class="ttdoc">Bounded thread-local string cache with FIFO single-entry eviction.</div><div class="ttdef"><b>Definition</b> fdl_tl_cache.h:38</div></div>
+<div class="ttc" id="aclassfdl_1_1detail_1_1TlStringCache_html_a7017b7ecab648061be58fea71e9e07d0"><div class="ttname"><a href="classfdl_1_1detail_1_1TlStringCache.html#a7017b7ecab648061be58fea71e9e07d0">fdl::detail::TlStringCache::get</a></div><div class="ttdeci">std::string &amp; get(const Key &amp;key)</div><div class="ttdoc">Get or create a cached string entry for the given key.</div><div class="ttdef"><b>Definition</b> fdl_tl_cache.h:50</div></div>
 <div class="ttc" id="afdl__constants_8h_html"><div class="ttname"><a href="fdl__constants_8h.html">fdl_constants.h</a></div><div class="ttdoc">Named constants replacing magic numbers throughout the FDL core library.</div></div>
 <div class="ttc" id="afdl__constants_8h_html_a90722df5048f24dc5517ce450fa83f23"><div class="ttname"><a href="fdl__constants_8h.html#a90722df5048f24dc5517ce450fa83f23">fdl::constants::kTlCacheMaxEntries</a></div><div class="ttdeci">constexpr size_t kTlCacheMaxEntries</div><div class="ttdoc">Max entries before a thread-local string cache auto-clears.</div><div class="ttdef"><b>Definition</b> fdl_constants.h:117</div></div>
 </div><!-- fragment --></div><!-- contents -->

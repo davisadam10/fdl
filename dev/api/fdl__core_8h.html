@@ -2638,6 +2638,8 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fdl_file_sequence
 <p>&lt; POSIX strdup.</p>
 <p>&lt; POSIX strdup.</p>
 <p>&lt; POSIX strdup.</p>
+<p>&lt; POSIX strdup.</p>
+<p>&lt; POSIX strdup.</p>
 
 </div>
 </div>
@@ -2663,7 +2665,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fdl_file_sequence
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>UUID string, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>UUID string, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>
@@ -2689,7 +2691,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fdl_file_sequence
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Creator string, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Creator string, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>
@@ -2715,7 +2717,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fdl_file_sequence
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Default framing intent ID, or NULL if not present. Pointer valid until doc is freed. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Default framing intent ID, or NULL if not present. Pointer is thread-local and valid until the next call for the same field on the same thread (or cache eviction). </dd></dl>
 
 </div>
 </div>
