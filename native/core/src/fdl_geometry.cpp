@@ -362,6 +362,9 @@ fdl_geometry_t geometry_crop(
 
 int geometry_get_dims_anchor_from_path(
     const fdl_geometry_t* geo, fdl_geometry_path_t path, fdl_dimensions_f64_t* out_dims, fdl_point_f64_t* out_anchor) {
+    if (geo == nullptr || out_dims == nullptr || out_anchor == nullptr) {
+        return fdl::constants::kGeometryInvalidPath;
+    }
 
     switch (path) {
     case FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS:

@@ -33,11 +33,11 @@ ojson* resolve_path(fdl_doc* owner, std::initializer_list<std::pair<const char*,
     }
     ojson* node = &owner->doc.data();
     for (const auto& [key, index] : steps) {
-        if (!node->contains(key)) {
+        if (!node->is_object() || !node->contains(key)) {
             return nullptr;
         }
         auto& arr = (*node)[key];
-        if (index >= arr.size()) {
+        if (!arr.is_array() || index >= arr.size()) {
             return nullptr;
         }
         node = &arr[index];
@@ -59,10 +59,14 @@ ojson* resolve_path(fdl_doc* owner, std::initializer_list<std::pair<const char*,
 ojson* resolve_path_then_key(
     fdl_doc* owner, std::initializer_list<std::pair<const char*, uint32_t>> steps, const char* final_key) {
     ojson* node = resolve_path(owner, steps);
-    if (node == nullptr || !node->contains(final_key)) {
+    if (node == nullptr || !node->is_object() || !node->contains(final_key)) {
         return nullptr;
     }
-    return &(*node)[final_key];
+    auto& child = (*node)[final_key];
+    if (child.is_null()) {
+        return nullptr;
+    }
+    return &child;
 }
 
 } // namespace
@@ -93,7 +97,7 @@ ojson* fdl_clip_id::node() const {
 
 ojson* fdl_file_sequence::node() const {
     ojson* cid = resolve_path_then_key(owner, {{"contexts", ctx_index}}, "clip_id");
-    if (cid == nullptr || !cid->contains("sequence")) {
+    if (cid == nullptr || !cid->is_object() || !cid->contains("sequence") || (*cid)["sequence"].is_null()) {
         return nullptr;
     }
     return &(*cid)["sequence"];

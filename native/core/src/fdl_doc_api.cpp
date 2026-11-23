@@ -88,6 +88,10 @@ void fdl_doc_free(fdl_doc_t* doc) {
 
 fdl_parse_result_t fdl_doc_parse_json(const char* json_str, size_t json_len) {
     fdl_parse_result_t result = {nullptr, nullptr};
+    if (json_str == nullptr) {
+        result.error = fdl_strdup("JSON input pointer is NULL");
+        return result;
+    }
     try {
         auto document = fdl::detail::Document::parse(json_str, json_len);
         auto* handle = new (std::nothrow) fdl_doc{std::move(document), {}, {}};
@@ -101,6 +105,8 @@ fdl_parse_result_t fdl_doc_parse_json(const char* json_str, size_t json_len) {
         result.error = fdl_strdup(e.what());
     } catch (const std::exception& e) {
         result.error = fdl_strdup(e.what());
+    } catch (...) {
+        result.error = fdl_strdup("Unknown error parsing JSON");
     }
     return result;
 }
@@ -133,9 +139,13 @@ char* fdl_doc_to_json(const fdl_doc_t* doc, int indent) {
     if (doc == nullptr) {
         return nullptr;
     }
-    const doc_lock lock(doc);
-    auto json_str = doc->doc.to_canonical_json(indent);
-    return fdl_strdup(json_str.c_str());
+    try {
+        const doc_lock lock(doc);
+        auto json_str = doc->doc.to_canonical_json(indent);
+        return fdl_strdup(json_str.c_str());
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 } // extern "C"

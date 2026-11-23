@@ -53,22 +53,37 @@ void fdl_framing_decision_adjust_anchor(
         return;
     }
 
-    const doc_lock lock(fd->owner);
-    auto* fd_n = fd->node();
-    auto* canvas_n = canvas->node();
-    if (fd_n == nullptr || canvas_n == nullptr) {
+    try {
+        const doc_lock lock(fd->owner);
+        auto* fd_n = fd->node();
+        auto* canvas_n = canvas->node();
+        if (fd_n == nullptr || canvas_n == nullptr || !fd_n->is_object() || !canvas_n->is_object()) {
+            return;
+        }
+        if (!canvas_n->contains("dimensions") || !(*canvas_n)["dimensions"].is_object() ||
+            !fd_n->contains("dimensions") || !(*fd_n)["dimensions"].is_object()) {
+            return;
+        }
+        const auto& cdims = (*canvas_n)["dimensions"];
+        const auto& fdims = (*fd_n)["dimensions"];
+        if (!cdims.contains("width") || !cdims["width"].is_number() || !cdims.contains("height") ||
+            !cdims["height"].is_number() || !fdims.contains("width") || !fdims["width"].is_number() ||
+            !fdims.contains("height") || !fdims["height"].is_number()) {
+            return;
+        }
+
+        double const canvas_w = cdims["width"].as<double>();
+        double const canvas_h = cdims["height"].as<double>();
+        double const fd_w = fdims["width"].as<double>();
+        double const fd_h = fdims["height"].as<double>();
+
+        double const anchor_x = align_offset(canvas_w, fd_w, h_align);
+        double const anchor_y = align_offset(canvas_h, fd_h, v_align);
+
+        fd_n->insert_or_assign("anchor_point", fdl::detail::make_point_float(anchor_x, anchor_y));
+    } catch (...) {
         return;
     }
-
-    double const canvas_w = static_cast<double>((*canvas_n)["dimensions"]["width"].as<int64_t>());
-    double const canvas_h = static_cast<double>((*canvas_n)["dimensions"]["height"].as<int64_t>());
-    double const fd_w = (*fd_n)["dimensions"]["width"].as<double>();
-    double const fd_h = (*fd_n)["dimensions"]["height"].as<double>();
-
-    double const anchor_x = align_offset(canvas_w, fd_w, h_align);
-    double const anchor_y = align_offset(canvas_h, fd_h, v_align);
-
-    fd_n->insert_or_assign("anchor_point", fdl::detail::make_point_float(anchor_x, anchor_y));
 }
 
 void fdl_framing_decision_adjust_protection_anchor(
@@ -77,22 +92,37 @@ void fdl_framing_decision_adjust_protection_anchor(
         return;
     }
 
-    const doc_lock lock(fd->owner);
-    auto* fd_n = fd->node();
-    auto* canvas_n = canvas->node();
-    if (fd_n == nullptr || canvas_n == nullptr) {
+    try {
+        const doc_lock lock(fd->owner);
+        auto* fd_n = fd->node();
+        auto* canvas_n = canvas->node();
+        if (fd_n == nullptr || canvas_n == nullptr || !fd_n->is_object() || !canvas_n->is_object()) {
+            return;
+        }
+        if (!canvas_n->contains("dimensions") || !(*canvas_n)["dimensions"].is_object() ||
+            !fd_n->contains("protection_dimensions") || !(*fd_n)["protection_dimensions"].is_object()) {
+            return;
+        }
+        const auto& cdims = (*canvas_n)["dimensions"];
+        const auto& pdims = (*fd_n)["protection_dimensions"];
+        if (!cdims.contains("width") || !cdims["width"].is_number() || !cdims.contains("height") ||
+            !cdims["height"].is_number() || !pdims.contains("width") || !pdims["width"].is_number() ||
+            !pdims.contains("height") || !pdims["height"].is_number()) {
+            return;
+        }
+
+        double const canvas_w = cdims["width"].as<double>();
+        double const canvas_h = cdims["height"].as<double>();
+        double const prot_w = pdims["width"].as<double>();
+        double const prot_h = pdims["height"].as<double>();
+
+        double const anchor_x = align_offset(canvas_w, prot_w, h_align);
+        double const anchor_y = align_offset(canvas_h, prot_h, v_align);
+
+        fd_n->insert_or_assign("protection_anchor_point", fdl::detail::make_point_float(anchor_x, anchor_y));
+    } catch (...) {
         return;
     }
-
-    double const canvas_w = static_cast<double>((*canvas_n)["dimensions"]["width"].as<int64_t>());
-    double const canvas_h = static_cast<double>((*canvas_n)["dimensions"]["height"].as<int64_t>());
-    double const prot_w = (*fd_n)["protection_dimensions"]["width"].as<double>();
-    double const prot_h = (*fd_n)["protection_dimensions"]["height"].as<double>();
-
-    double const anchor_x = align_offset(canvas_w, prot_w, h_align);
-    double const anchor_y = align_offset(canvas_h, prot_h, v_align);
-
-    fd_n->insert_or_assign("protection_anchor_point", fdl::detail::make_point_float(anchor_x, anchor_y));
 }
 
 void fdl_framing_decision_populate_from_intent(
@@ -104,54 +134,79 @@ void fdl_framing_decision_populate_from_intent(
         return;
     }
 
-    const doc_lock lock(fd->owner);
-    auto* fd_n = fd->node();
-    auto* canvas_n = canvas->node();
-    auto* intent_n = intent->node();
-    if (fd_n == nullptr || canvas_n == nullptr || intent_n == nullptr) {
+    try {
+        const doc_lock lock(fd->owner);
+        auto* fd_n = fd->node();
+        auto* canvas_n = canvas->node();
+        auto* intent_n = intent->node();
+        if (fd_n == nullptr || canvas_n == nullptr || intent_n == nullptr || !fd_n->is_object() ||
+            !canvas_n->is_object() || !intent_n->is_object()) {
+            return;
+        }
+        if (!canvas_n->contains("dimensions") || !(*canvas_n)["dimensions"].is_object() ||
+            !intent_n->contains("aspect_ratio") || !(*intent_n)["aspect_ratio"].is_object()) {
+            return;
+        }
+        const auto& cdims = (*canvas_n)["dimensions"];
+        const auto& ar = (*intent_n)["aspect_ratio"];
+        if (!cdims.contains("width") || !cdims["width"].is_number() || !cdims.contains("height") ||
+            !cdims["height"].is_number() || !ar.contains("width") || !ar["width"].is_number() ||
+            !ar.contains("height") || !ar["height"].is_number()) {
+            return;
+        }
+
+        // Get canvas dimensions (int -> double)
+        fdl_dimensions_f64_t const canvas_dims = {cdims["width"].as<double>(), cdims["height"].as<double>()};
+
+        // Working dims: effective if available, else canvas
+        fdl_dimensions_f64_t working_dims = canvas_dims;
+        if (canvas_n->contains("effective_dimensions") && (*canvas_n)["effective_dimensions"].is_object()) {
+            const auto& edims = (*canvas_n)["effective_dimensions"];
+            if (edims.contains("width") && edims["width"].is_number() && edims.contains("height") &&
+                edims["height"].is_number()) {
+                working_dims.width = edims["width"].as<double>();
+                working_dims.height = edims["height"].as<double>();
+            }
+        }
+
+        // Get squeeze
+        double const squeeze =
+            (canvas_n->contains("anamorphic_squeeze") && (*canvas_n)["anamorphic_squeeze"].is_number())
+                ? (*canvas_n)["anamorphic_squeeze"].as<double>()
+                : fdl::constants::kIdentitySqueeze;
+
+        // Get aspect ratio from intent
+        fdl_dimensions_i64_t const aspect_ratio = {ar["width"].as<int64_t>(), ar["height"].as<int64_t>()};
+
+        // Get protection from intent
+        double const protection = (intent_n->contains("protection") && (*intent_n)["protection"].is_number())
+                                      ? (*intent_n)["protection"].as<double>()
+                                      : 0.0;
+
+        // Compute
+        fdl_from_intent_result_t const result = fdl::detail::compute_framing_from_intent(
+            canvas_dims, working_dims, squeeze, aspect_ratio, protection, rounding);
+
+        // Write to FD
+        fd_n->insert_or_assign(
+            "dimensions", fdl::detail::make_dimensions_float(result.dimensions.width, result.dimensions.height));
+        fd_n->insert_or_assign(
+            "anchor_point", fdl::detail::make_point_float(result.anchor_point.x, result.anchor_point.y));
+
+        if (result.has_protection != 0) {
+            fd_n->insert_or_assign(
+                "protection_dimensions",
+                fdl::detail::make_dimensions_float(
+                    result.protection_dimensions.width, result.protection_dimensions.height));
+            fd_n->insert_or_assign(
+                "protection_anchor_point",
+                fdl::detail::make_point_float(result.protection_anchor_point.x, result.protection_anchor_point.y));
+        } else {
+            fd_n->erase("protection_dimensions");
+            fd_n->erase("protection_anchor_point");
+        }
+    } catch (...) {
         return;
-    }
-
-    // Get canvas dimensions (int -> double)
-    fdl_dimensions_f64_t const canvas_dims = {
-        static_cast<double>((*canvas_n)["dimensions"]["width"].as<int64_t>()),
-        static_cast<double>((*canvas_n)["dimensions"]["height"].as<int64_t>())};
-
-    // Working dims: effective if available, else canvas
-    fdl_dimensions_f64_t working_dims = canvas_dims;
-    if (canvas_n->contains("effective_dimensions")) {
-        working_dims.width = static_cast<double>((*canvas_n)["effective_dimensions"]["width"].as<int64_t>());
-        working_dims.height = static_cast<double>((*canvas_n)["effective_dimensions"]["height"].as<int64_t>());
-    }
-
-    // Get squeeze
-    double const squeeze = canvas_n->contains("anamorphic_squeeze") ? (*canvas_n)["anamorphic_squeeze"].as<double>()
-                                                                    : fdl::constants::kIdentitySqueeze;
-
-    // Get aspect ratio from intent
-    fdl_dimensions_i64_t const aspect_ratio = {
-        (*intent_n)["aspect_ratio"]["width"].as<int64_t>(), (*intent_n)["aspect_ratio"]["height"].as<int64_t>()};
-
-    // Get protection from intent
-    double const protection = intent_n->contains("protection") ? (*intent_n)["protection"].as<double>() : 0.0;
-
-    // Compute
-    fdl_from_intent_result_t const result = fdl::detail::compute_framing_from_intent(
-        canvas_dims, working_dims, squeeze, aspect_ratio, protection, rounding);
-
-    // Write to FD
-    fd_n->insert_or_assign(
-        "dimensions", fdl::detail::make_dimensions_float(result.dimensions.width, result.dimensions.height));
-    fd_n->insert_or_assign("anchor_point", fdl::detail::make_point_float(result.anchor_point.x, result.anchor_point.y));
-
-    if (result.has_protection != 0) {
-        fd_n->insert_or_assign(
-            "protection_dimensions",
-            fdl::detail::make_dimensions_float(
-                result.protection_dimensions.width, result.protection_dimensions.height));
-        fd_n->insert_or_assign(
-            "protection_anchor_point",
-            fdl::detail::make_point_float(result.protection_anchor_point.x, result.protection_anchor_point.y));
     }
 }
 

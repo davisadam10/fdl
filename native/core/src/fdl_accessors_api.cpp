@@ -86,7 +86,7 @@ const char* get_string(const ojson* node, const char* key) {
  * @return The field value, or @p default_val if not present.
  */
 double get_double(const ojson* node, const char* key, double default_val) {
-    if (node == nullptr || !node->contains(key)) {
+    if (node == nullptr || !node->contains(key) || !(*node)[key].is_number()) {
         return default_val;
     }
     return (*node)[key].as<double>();
@@ -110,10 +110,10 @@ template<typename DimsT, typename ValueT> DimsT get_dims(const ojson* node, cons
         return result;
     }
     const auto& obj = (*node)[key];
-    if (obj.contains("width")) {
+    if (obj.contains("width") && obj["width"].is_number()) {
         result.width = obj["width"].as<ValueT>();
     }
-    if (obj.contains("height")) {
+    if (obj.contains("height") && obj["height"].is_number()) {
         result.height = obj["height"].as<ValueT>();
     }
     return result;
@@ -141,10 +141,10 @@ fdl_point_f64_t get_point_f64(const ojson* node, const char* key) {
         return result;
     }
     const auto& obj = (*node)[key];
-    if (obj.contains("x")) {
+    if (obj.contains("x") && obj["x"].is_number()) {
         result.x = obj["x"].as<double>();
     }
-    if (obj.contains("y")) {
+    if (obj.contains("y") && obj["y"].is_number()) {
         result.y = obj["y"].as<double>();
     }
     return result;
@@ -243,7 +243,7 @@ int fdl_canvas_has_effective_dimensions(const fdl_canvas_t* canvas) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("effective_dimensions") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("effective_dimensions") && !(*n)["effective_dimensions"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_dimensions_i64_t fdl_canvas_get_effective_dimensions(const fdl_canvas_t* canvas) {
@@ -291,7 +291,7 @@ int fdl_canvas_has_photosite_dimensions(const fdl_canvas_t* canvas) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("photosite_dimensions") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("photosite_dimensions") && !(*n)["photosite_dimensions"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_dimensions_i64_t fdl_canvas_get_photosite_dimensions(const fdl_canvas_t* canvas) {
@@ -315,7 +315,7 @@ int fdl_canvas_has_physical_dimensions(const fdl_canvas_t* canvas) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("physical_dimensions") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("physical_dimensions") && !(*n)["physical_dimensions"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_dimensions_f64_t fdl_canvas_get_physical_dimensions(const fdl_canvas_t* canvas) {
@@ -339,7 +339,7 @@ int fdl_context_has_clip_id(const fdl_context_t* ctx) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("clip_id") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("clip_id") && !(*n)["clip_id"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 const char* fdl_context_get_clip_id(const fdl_context_t* ctx) {
@@ -367,7 +367,7 @@ fdl_clip_id_t* fdl_context_clip_id(fdl_context_t* ctx) {
     }
     const doc_lock lock(ctx->owner);
     auto* n = ctx->node();
-    if (n == nullptr || !n->contains("clip_id")) {
+    if (n == nullptr || !n->contains("clip_id") || (*n)["clip_id"].is_null()) {
         return nullptr;
     }
     auto& cache = ctx->owner->handles;
@@ -405,7 +405,7 @@ int fdl_clip_id_has_file(const fdl_clip_id_t* cid) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("file") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("file") && !(*n)["file"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 const char* fdl_clip_id_get_file(const fdl_clip_id_t* cid) {
@@ -429,7 +429,7 @@ int fdl_clip_id_has_sequence(const fdl_clip_id_t* cid) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("sequence") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("sequence") && !(*n)["sequence"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_file_sequence_t* fdl_clip_id_sequence(fdl_clip_id_t* cid) {
@@ -438,7 +438,7 @@ fdl_file_sequence_t* fdl_clip_id_sequence(fdl_clip_id_t* cid) {
     }
     const doc_lock lock(cid->owner);
     auto* n = cid->node();
-    if (n == nullptr || !n->contains("sequence")) {
+    if (n == nullptr || !n->contains("sequence") || (*n)["sequence"].is_null()) {
         return nullptr;
     }
     auto& cache = cid->owner->handles;
@@ -497,7 +497,7 @@ int64_t fdl_file_sequence_get_min(const fdl_file_sequence_t* seq) {
     }
     const doc_lock lock(seq->owner);
     auto* n = seq->node();
-    if (n == nullptr || !n->contains("min")) {
+    if (n == nullptr || !n->contains("min") || !(*n)["min"].is_number()) {
         return 0;
     }
     return (*n)["min"].as<int64_t>();
@@ -509,7 +509,7 @@ int64_t fdl_file_sequence_get_max(const fdl_file_sequence_t* seq) {
     }
     const doc_lock lock(seq->owner);
     auto* n = seq->node();
-    if (n == nullptr || !n->contains("max")) {
+    if (n == nullptr || !n->contains("max") || !(*n)["max"].is_number()) {
         return 0;
     }
     return (*n)["max"].as<int64_t>();
@@ -588,7 +588,7 @@ int fdl_framing_decision_has_protection(const fdl_framing_decision_t* fd) {
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("protection_dimensions") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("protection_dimensions") && !(*n)["protection_dimensions"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_dimensions_f64_t fdl_framing_decision_get_protection_dimensions(const fdl_framing_decision_t* fd) {
@@ -725,7 +725,7 @@ fdl_geometry_path_t fdl_canvas_template_get_fit_source(const fdl_canvas_template
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("fit_source")) {
+    if (n == nullptr || !n->contains("fit_source") || !(*n)["fit_source"].is_string()) {
         return FDL_GEOMETRY_PATH_FRAMING_DIMENSIONS;
     }
     return fdl::detail::geometry_path_from_string((*n)["fit_source"].as<std::string_view>());
@@ -737,7 +737,7 @@ fdl_fit_method_t fdl_canvas_template_get_fit_method(const fdl_canvas_template_t*
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("fit_method")) {
+    if (n == nullptr || !n->contains("fit_method") || !(*n)["fit_method"].is_string()) {
         return FDL_FIT_METHOD_WIDTH;
     }
     return fdl::detail::fit_method_from_string((*n)["fit_method"].as<std::string_view>());
@@ -749,7 +749,8 @@ fdl_halign_t fdl_canvas_template_get_alignment_method_horizontal(const fdl_canva
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("alignment_method_horizontal")) {
+    if (n == nullptr || !n->contains("alignment_method_horizontal") ||
+        !(*n)["alignment_method_horizontal"].is_string()) {
         return FDL_HALIGN_CENTER;
     }
     return fdl::detail::halign_from_string((*n)["alignment_method_horizontal"].as<std::string_view>());
@@ -761,7 +762,7 @@ fdl_valign_t fdl_canvas_template_get_alignment_method_vertical(const fdl_canvas_
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("alignment_method_vertical")) {
+    if (n == nullptr || !n->contains("alignment_method_vertical") || !(*n)["alignment_method_vertical"].is_string()) {
         return FDL_VALIGN_CENTER;
     }
     return fdl::detail::valign_from_string((*n)["alignment_method_vertical"].as<std::string_view>());
@@ -776,7 +777,8 @@ int fdl_canvas_template_has_preserve_from_source_canvas(const fdl_canvas_templat
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("preserve_from_source_canvas") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("preserve_from_source_canvas") && !(*n)["preserve_from_source_canvas"].is_null()) ? FDL_TRUE
+                                                                                                          : FDL_FALSE;
 }
 
 fdl_geometry_path_t fdl_canvas_template_get_preserve_from_source_canvas(const fdl_canvas_template_t* ct) {
@@ -785,7 +787,8 @@ fdl_geometry_path_t fdl_canvas_template_get_preserve_from_source_canvas(const fd
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("preserve_from_source_canvas")) {
+    if (n == nullptr || !n->contains("preserve_from_source_canvas") ||
+        !(*n)["preserve_from_source_canvas"].is_string()) {
         return FDL_GEOMETRY_PATH_CANVAS_DIMENSIONS;
     }
     return fdl::detail::geometry_path_from_string((*n)["preserve_from_source_canvas"].as<std::string_view>());
@@ -800,7 +803,7 @@ int fdl_canvas_template_has_maximum_dimensions(const fdl_canvas_template_t* ct) 
     if (n == nullptr) {
         return 0;
     }
-    return n->contains("maximum_dimensions") ? FDL_TRUE : FDL_FALSE;
+    return (n->contains("maximum_dimensions") && !(*n)["maximum_dimensions"].is_null()) ? FDL_TRUE : FDL_FALSE;
 }
 
 fdl_dimensions_i64_t fdl_canvas_template_get_maximum_dimensions(const fdl_canvas_template_t* ct) {
@@ -821,7 +824,7 @@ int fdl_canvas_template_get_pad_to_maximum(const fdl_canvas_template_t* ct) {
     }
     const doc_lock lock(ct->owner);
     auto* n = ct->node();
-    if (n == nullptr || !n->contains("pad_to_maximum")) {
+    if (n == nullptr || !n->contains("pad_to_maximum") || !(*n)["pad_to_maximum"].is_bool()) {
         return 0;
     }
     return (*n)["pad_to_maximum"].as<bool>() ? FDL_TRUE : FDL_FALSE;
@@ -874,7 +877,7 @@ int fdl_doc_get_version_major(const fdl_doc_t* doc) {
         return 0;
     }
     const auto& ver = data["version"];
-    if (!ver.contains("major")) {
+    if (!ver.contains("major") || !ver["major"].is_int64()) {
         return 0;
     }
     return ver["major"].as<int>();
@@ -890,7 +893,7 @@ int fdl_doc_get_version_minor(const fdl_doc_t* doc) {
         return 0;
     }
     const auto& ver = data["version"];
-    if (!ver.contains("minor")) {
+    if (!ver.contains("minor") || !ver["minor"].is_int64()) {
         return 0;
     }
     return ver["minor"].as<int>();
