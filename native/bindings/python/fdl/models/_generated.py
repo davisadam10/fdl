@@ -214,6 +214,6 @@ class FramingDecisionList(BaseModel):
         from fdl import FDL
 
         json_bytes = self.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
-        doc = FDL.parse(json_bytes)
-        doc.validate()
+        with FDL.parse(json_bytes) as doc:
+            doc.validate()
         return self
