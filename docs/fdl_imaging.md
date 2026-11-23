@@ -41,7 +41,7 @@ extract_framing_region(
     input_path="source.tif",
     output_path="framed.tif",
     fdl="scene.fdl",
-    context_id="Camera A",
+    context_index=0,
     canvas_id="canvas_001",
     framing_decision_id="fd_001",
     output_width=1920,
@@ -59,10 +59,10 @@ process_image_with_fdl_template(
     output_path="transformed.tif",
     source_fdl="source.fdl",
     template_fdl="template.fdl",
-    context_id="Camera A",
+    context_index=0,
     canvas_id="canvas_001",
     framing_decision_id="fd_001",
-    template_label="UHD Delivery",
+    template_id="UHD Delivery",
 )
 ```
 
@@ -75,10 +75,10 @@ from fdl_imaging.text import render_dimension_label
 
 buf = oiio.ImageBuf(oiio.ImageSpec(1920, 1080, 4, oiio.FLOAT))
 
-draw_rect_outline(buf, x=100, y=50, w=1720, h=980, color=(0.5, 0.5, 0.5, 1.0), line_width=2)
-draw_crosshair(buf, cx=960, cy=540, size=40, color=(0.0, 0.8, 0.4, 1.0), line_width=1)
-draw_grid(buf, spacing=100, color=(0.3, 0.3, 0.3, 0.5), line_width=1)
-render_dimension_label(buf, "1920 x 1080", x=960, y=1060, font_size=14, color=(1.0, 1.0, 1.0, 1.0))
+draw_rect_outline(buf, x=100, y=50, width=1720, height=980, thickness=2, color=(0.5, 0.5, 0.5, 1.0))
+draw_crosshair(buf, center_x=960, center_y=540, size_x=40, size_y=40, thickness=1, color=(0.0, 0.8, 0.4, 1.0))
+draw_grid(buf, width=1920, height=1080, spacing=100, thickness=1, color=(0.3, 0.3, 0.3, 0.5))
+render_dimension_label(buf, width=1920, height=1080, x=960, y=1060, font_size=14, color=(1.0, 1.0, 1.0, 1.0))
 
 buf.write("overlay.png")
 ```
@@ -98,17 +98,19 @@ buf.write("overlay.png")
 The `ImageComparison` class provides configurable pixel-level image comparison:
 
 ```python
+from pathlib import Path
 from fdl_imaging.testing import ImageComparison
 
-comparator = ImageComparison(
-    fail_threshold=0.01,  # per-pixel difference threshold
-    warn_threshold=0.005,
-    allowed_failed_pixels=100,  # tolerance for cross-platform text rendering
-    outputs_dir="test_outputs",  # save diff images here
-)
+comparator = ImageComparison(outputs_dir=Path("test_outputs"))
 
-result = comparator.compare("expected.tif", "actual.tif")
-assert result.passed, result.message
+passed = comparator.compare_images(
+    expected_path=Path("expected.tif"),
+    actual_path=Path("actual.tif"),
+    fail_thresh=0.01,
+    warn_thresh=0.005,
+    allowed_failed_pixels=100,
+)
+assert passed
 ```
 
 ## Package Relationships

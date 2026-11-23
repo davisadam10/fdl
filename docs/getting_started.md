@@ -25,7 +25,7 @@ the simplest workflow is:
 === "TypeScript"
 
     ```typescript
-    import { readFromFile, writeToFile } from 'fdl';
+    import { readFromFile, writeToFile } from '@asc-mitc/fdl';
 
     // Load from a file (validates automatically)
     const myFdl = readFromFile('my_document.fdl');
@@ -73,7 +73,7 @@ validation, or call `validate()` manually:
 === "TypeScript"
 
     ```typescript
-    import { readFromFile, readFromString, writeToString } from 'fdl';
+    import { readFromFile, readFromString, writeToString } from '@asc-mitc/fdl';
 
     const myFdl = readFromFile('my_document.fdl');
 
@@ -162,7 +162,7 @@ validation, or call `validate()` manually:
     ```typescript
     import {
       FDL, DimensionsInt, DimensionsFloat, PointFloat, writeToFile,
-    } from 'fdl';
+    } from '@asc-mitc/fdl';
 
     // Create a new FDL document
     const myFdl = new FDL({});
@@ -279,7 +279,7 @@ validation, or call `validate()` manually:
 === "TypeScript"
 
     ```typescript
-    import { readFromFile } from 'fdl';
+    import { readFromFile } from '@asc-mitc/fdl';
 
     const myFdl = readFromFile('my_document.fdl');
 
@@ -403,7 +403,7 @@ validation, or call `validate()` manually:
     import {
       readFromFile,
       ATTR_SCALE_FACTOR, ATTR_CONTENT_TRANSLATION, ATTR_SCALED_BOUNDING_BOX,
-    } from 'fdl';
+    } from '@asc-mitc/fdl';
 
     const myFdl = readFromFile('my_document.fdl');
 
@@ -526,7 +526,7 @@ The rounding strategy has two components:
     import {
       DimensionsFloat, RoundStrategy, RoundingEven, RoundingMode,
       getRounding, setRounding, DEFAULT_ROUNDING_STRATEGY,
-    } from 'fdl';
+    } from '@asc-mitc/fdl';
 
     // Check the default strategy
     const def = getRounding();
@@ -627,7 +627,7 @@ composite types (PointFloat, DimensionsFloat, DimensionsInt).
 === "TypeScript"
 
     ```typescript
-    import { FDL, DimensionsInt, DimensionsFloat, PointFloat } from 'fdl';
+    import { FDL, DimensionsInt, DimensionsFloat, PointFloat } from '@asc-mitc/fdl';
 
     const myFdl = new FDL({});
 
@@ -715,7 +715,7 @@ custom attributes on the output canvas. Use the named constants to access them:
     ```typescript
     import {
       ATTR_SCALE_FACTOR, ATTR_CONTENT_TRANSLATION, ATTR_SCALED_BOUNDING_BOX,
-    } from 'fdl';
+    } from '@asc-mitc/fdl';
 
     console.log(ATTR_SCALE_FACTOR);         // "scale_factor"
     console.log(ATTR_CONTENT_TRANSLATION);  // "content_translation"
