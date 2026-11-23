@@ -33,16 +33,24 @@ int64_t fdl_round(double value, fdl_rounding_even_t even, fdl_rounding_mode_t mo
     }
 
     if (even == FDL_ROUNDING_EVEN_EVEN) {
+        constexpr int64_t kMaxEven = std::numeric_limits<int64_t>::max() - fdl::constants::kEvenRoundingAdjustment;
         if (mode == FDL_ROUNDING_MODE_UP) {
-            v = (v % fdl::constants::kEvenDivisor == 0) ? v : v + fdl::constants::kEvenRoundingAdjustment;
+            if (v % fdl::constants::kEvenDivisor != 0) {
+                v = (v <= kMaxEven) ? (v + fdl::constants::kEvenRoundingAdjustment) : kMaxEven;
+            }
         } else if (mode == FDL_ROUNDING_MODE_DOWN) {
             v = (v % fdl::constants::kEvenDivisor == 0) ? v : v - fdl::constants::kEvenRoundingAdjustment;
         } else {
             if (v % fdl::constants::kEvenDivisor != 0) {
-                int64_t const up = v + fdl::constants::kEvenRoundingAdjustment;
                 int64_t const down = v - fdl::constants::kEvenRoundingAdjustment;
-                v = (std::abs(static_cast<double>(up) - value) <= std::abs(static_cast<double>(down) - value)) ? up
-                                                                                                               : down;
+                if (v > kMaxEven) {
+                    v = down;
+                } else {
+                    int64_t const up = v + fdl::constants::kEvenRoundingAdjustment;
+                    v = (std::abs(static_cast<double>(up) - value) <= std::abs(static_cast<double>(down) - value))
+                            ? up
+                            : down;
+                }
             }
         }
     }

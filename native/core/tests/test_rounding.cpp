@@ -61,3 +61,35 @@ TEST_CASE("fdl_round_point rounds both components", "[rounding]") {
     REQUIRE(result.x == 20.0);
     REQUIRE(result.y == 80.0);
 }
+
+TEST_CASE("fdl_round handles NaN and INT64_MAX without UB", "[rounding][ub]") {
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    const double inf = std::numeric_limits<double>::infinity();
+    REQUIRE(fdl_round(nan, FDL_ROUNDING_EVEN_WHOLE, FDL_ROUNDING_MODE_ROUND) == 0);
+    REQUIRE(fdl_round(nan, FDL_ROUNDING_EVEN_EVEN, FDL_ROUNDING_MODE_UP) == 0);
+    // Clamped to max even int64 without signed overflow
+    const int64_t max_even = std::numeric_limits<int64_t>::max() - 1;
+    REQUIRE(fdl_round(inf, FDL_ROUNDING_EVEN_EVEN, FDL_ROUNDING_MODE_UP) == max_even);
+    REQUIRE(fdl_round(inf, FDL_ROUNDING_EVEN_EVEN, FDL_ROUNDING_MODE_ROUND) == max_even);
+    // fp_close(inf, inf) matches Python math.isclose(inf, inf) == True
+    REQUIRE(fdl_dimensions_equal({inf, 100.0}, {inf, 100.0}) == FDL_TRUE);
+}
+
+TEST_CASE("fdl_geometry_apply_offset honors NULL theoretical pointers", "[geometry][contract]") {
+    fdl_geometry_t geo{};
+    geo.canvas_dims = {1920.0, 1080.0};
+    geo.framing_dims = {1920.0, 800.0};
+    geo.framing_anchor = {10.0, 20.0};
+    fdl_geometry_t out = fdl_geometry_apply_offset(geo, {5.0, 10.0}, nullptr, nullptr, nullptr);
+    REQUIRE(out.framing_anchor.x == 15.0);
+    REQUIRE(out.framing_anchor.y == 30.0);
+}
+
+TEST_CASE("fdl_doc_set_default_framing_intent clears on NULL", "[builder][contract]") {
+    fdl_doc_t* doc = fdl_doc_create_with_header("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", 2, 0, "test", "FI_1");
+    REQUIRE(doc != nullptr);
+    REQUIRE(std::string(fdl_doc_get_default_framing_intent(doc)) == "FI_1");
+    fdl_doc_set_default_framing_intent(doc, nullptr);
+    REQUIRE(fdl_doc_get_default_framing_intent(doc) == nullptr);
+    fdl_doc_free(doc);
+}

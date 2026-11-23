@@ -267,24 +267,29 @@ fdl_geometry_t geometry_apply_offset(
     fdl_point_f64_t* theo_prot,
     fdl_point_f64_t* theo_fram) {
 
-    // All output pointers are required — return geometry unmodified if any is null.
-    if (theo_eff == nullptr || theo_prot == nullptr || theo_fram == nullptr) {
-        return geo;
-    }
-
     // Calculate theoretical anchor positions (may be negative)
-    *theo_eff = fdl_point_add(geo.effective_anchor, offset);
-    *theo_prot = fdl_point_add(geo.protection_anchor, offset);
-    *theo_fram = fdl_point_add(geo.framing_anchor, offset);
+    fdl_point_f64_t const eff = fdl_point_add(geo.effective_anchor, offset);
+    fdl_point_f64_t const prot = fdl_point_add(geo.protection_anchor, offset);
+    fdl_point_f64_t const fram = fdl_point_add(geo.framing_anchor, offset);
+
+    if (theo_eff != nullptr) {
+        *theo_eff = eff;
+    }
+    if (theo_prot != nullptr) {
+        *theo_prot = prot;
+    }
+    if (theo_fram != nullptr) {
+        *theo_fram = fram;
+    }
 
     return {
         geo.canvas_dims,
         geo.effective_dims,
         geo.protection_dims,
         geo.framing_dims,
-        fdl_point_clamp(*theo_eff, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
-        fdl_point_clamp(*theo_prot, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
-        fdl_point_clamp(*theo_fram, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
+        fdl_point_clamp(eff, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
+        fdl_point_clamp(prot, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
+        fdl_point_clamp(fram, 0.0, 0.0, FDL_TRUE, FDL_FALSE),
     };
 }
 

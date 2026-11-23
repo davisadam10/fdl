@@ -221,7 +221,7 @@ fdl_template_result_t build_template_output_document(
         fdl::constants::kDefaultVersionMajor,
         0,
         (context_creator != nullptr) ? context_creator : "",
-        src_default_fi.c_str());
+        src_default_fi.empty() ? nullptr : src_default_fi.c_str());
 
     if (out_doc == nullptr) {
         result.error = fdl_strdup("Failed to create output document");
@@ -500,6 +500,10 @@ fdl_template_result_t apply_canvas_template(
 
     // --- Calculate scale factor ---
     fdl_dimensions_f64_t const fit_norm = fdl_dimensions_normalize(fit_dims, input_squeeze);
+    if (fit_norm.width <= 0.0 || fit_norm.height <= 0.0 || target_squeeze <= 0.0) {
+        result.error = fdl_strdup("Invalid fit dimensions or target_anamorphic_squeeze (must be > 0)");
+        return result;
+    }
     fdl_dimensions_f64_t const target_norm = fdl_dimensions_normalize(target_dims, target_squeeze);
     auto const scale_ratio = fdl::detail::calculate_scale_ratio(fit_norm, target_norm, fit_method);
     double const scale_factor = scale_ratio.numerator / scale_ratio.denominator;

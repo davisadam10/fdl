@@ -28,6 +28,9 @@ namespace fdl::detail {
  * @return The integer value, clamped to int64_t bounds.
  */
 inline int64_t safe_to_int64(double value) {
+    if (std::isnan(value)) {
+        return 0;
+    }
     // Doubles beyond int64_t range would cause UB in static_cast.
     constexpr auto kMax = static_cast<double>(std::numeric_limits<int64_t>::max());
     constexpr auto kMin = static_cast<double>(std::numeric_limits<int64_t>::min());

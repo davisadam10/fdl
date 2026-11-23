@@ -29,7 +29,8 @@ fdl_from_intent_result_t compute_framing_from_intent(
     result.has_protection = FDL_FALSE;
 
     // Guard against division by zero in aspect ratio or working dimensions.
-    if (aspect_ratio.height == 0 || working_dims.height == 0.0) {
+    if (aspect_ratio.width <= 0 || aspect_ratio.height <= 0 || working_dims.width <= 0.0 ||
+        working_dims.height <= 0.0) {
         return result;
     }
 
